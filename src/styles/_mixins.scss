@@ -1,0 +1,6 @@
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 3px solid var(--matthew-ui-color-focus);
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,97 @@
+@use '../../styles/mixins' as mixins;
+
+.matthew-button {
+  --matthew-button-background: var(--matthew-ui-color-surface);
+  --matthew-button-background-hover: var(--matthew-ui-color-surface-hover);
+  --matthew-button-background-active: var(--matthew-ui-color-surface-active);
+  --matthew-button-border: var(--matthew-ui-color-border);
+  --matthew-button-color: var(--matthew-ui-color-text);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: max-content;
+  border: 1px solid var(--matthew-button-border);
+  border-radius: var(--matthew-ui-radius-md);
+  background: var(--matthew-button-background);
+  color: var(--matthew-button-color);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--matthew-ui-duration-fast) ease,
+    border-color var(--matthew-ui-duration-fast) ease,
+    box-shadow var(--matthew-ui-duration-fast) ease,
+    transform var(--matthew-ui-duration-fast) ease;
+
+  @include mixins.focus-ring;
+
+  &:not(:disabled):not([aria-disabled='true']):hover {
+    background: var(--matthew-button-background-hover);
+  }
+
+  &:not(:disabled):not([aria-disabled='true']):active {
+    background: var(--matthew-button-background-active);
+    transform: translateY(1px);
+  }
+
+  &:disabled,
+  &[aria-disabled='true'],
+  &--disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    --matthew-button-background: var(--matthew-ui-color-primary);
+    --matthew-button-background-hover: var(--matthew-ui-color-primary-hover);
+    --matthew-button-background-active: var(--matthew-ui-color-primary-active);
+    --matthew-button-border: var(--matthew-ui-color-primary);
+    --matthew-button-color: var(--matthew-ui-color-text-inverse);
+  }
+
+  &--secondary {
+    --matthew-button-background: var(--matthew-ui-color-surface);
+    --matthew-button-background-hover: var(--matthew-ui-color-surface-hover);
+    --matthew-button-background-active: var(--matthew-ui-color-surface-active);
+    --matthew-button-border: var(--matthew-ui-color-border);
+    --matthew-button-color: var(--matthew-ui-color-text);
+  }
+
+  &--danger {
+    --matthew-button-background: var(--matthew-ui-color-danger);
+    --matthew-button-background-hover: var(--matthew-ui-color-danger-hover);
+    --matthew-button-background-active: var(--matthew-ui-color-danger-active);
+    --matthew-button-border: var(--matthew-ui-color-danger);
+    --matthew-button-color: var(--matthew-ui-color-text-inverse);
+  }
+
+  &--sm {
+    min-height: 2rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  &--md {
+    min-height: 2.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  &--lg {
+    min-height: 3rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matthew-button {
+    transition: none;
+  }
+}
