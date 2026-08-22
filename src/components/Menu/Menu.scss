@@ -1,0 +1,21 @@
+@use '../../styles/mixins' as mixins;
+
+.matthew-menu {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: var(--matthew-ui-color-text);
+  font: inherit;
+  list-style: none;
+
+  &--horizontal { display: flex; gap: .25rem; border-bottom: 1px solid var(--matthew-ui-color-border); }
+  &--vertical { display: grid; gap: .25rem; max-width: 18rem; padding: .25rem; border: 1px solid var(--matthew-ui-color-border); border-radius: var(--matthew-ui-radius-md); }
+  &__item, &__submenu-trigger { box-sizing: border-box; display: flex; align-items: center; width: 100%; min-height: 2.5rem; padding: .5rem .75rem; border: 0; border-radius: calc(var(--matthew-ui-radius-md) - .125rem); background: transparent; color: inherit; font: inherit; text-align: left; text-decoration: none; cursor: pointer; transition: background-color var(--matthew-ui-duration-fast) ease; @include mixins.focus-ring; }
+  &__item:hover:not(:disabled):not([aria-disabled='true']), &__submenu-trigger:hover { background: var(--matthew-ui-color-surface-hover); }
+  &__item--selected, &__submenu--descendant-active > &__submenu-trigger { background: var(--matthew-ui-color-surface-active); color: var(--matthew-ui-color-primary-active); font-weight: 600; }
+  &__item--disabled { opacity: .55; cursor: not-allowed; }
+  &__submenu { position: relative; list-style: none; }
+  &__submenu-list { display: grid; gap: .25rem; margin: .25rem 0 0; padding: .25rem; list-style: none; }
+  &__submenu-list[hidden] { display: none; }
+  &--horizontal &__submenu-list { position: absolute; z-index: 1; top: calc(100% + .25rem); left: 0; min-width: 12rem; border: 1px solid var(--matthew-ui-color-border); border-radius: var(--matthew-ui-radius-md); background: var(--matthew-ui-color-surface); box-shadow: 0 .75rem 1.5rem rgb(15 23 42 / 12%); }
+}
