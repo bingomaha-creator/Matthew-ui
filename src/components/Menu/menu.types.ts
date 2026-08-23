@@ -22,7 +22,7 @@ export type MenuItemProps = Omit<ComponentPropsWithoutRef<'button'>, 'value'> & 
 
 export type MenuLinkItemProps = Omit<
   ComponentPropsWithoutRef<'a'>,
-  'aria-disabled' | 'href' | 'value'
+  'aria-disabled' | 'href' | 'role' | 'value'
 > & {
   children?: ReactNode
   disabled?: boolean

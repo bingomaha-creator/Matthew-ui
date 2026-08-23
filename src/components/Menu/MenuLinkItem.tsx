@@ -1,8 +1,7 @@
-import { useContext, useEffect, type MouseEvent } from 'react'
+import type { MouseEvent } from 'react'
 import clsx from 'clsx'
-import { MenuContext } from './menu.context'
-import { SubMenuContext } from './menu-submenu.context'
 import type { MenuLinkItemProps } from './menu.types'
+import { useMenuItemState } from './use-menu-item-state'
 
 export function MenuLinkItem({
   children,
@@ -13,29 +12,21 @@ export function MenuLinkItem({
   className,
   ...restProps
 }: MenuLinkItemProps) {
-  const menu = useContext(MenuContext)
-  const subMenu = useContext(SubMenuContext)
-  const registerItem = subMenu?.registerItem
-  const unregisterItem = subMenu?.unregisterItem
-  const isSelected = menu?.selectedValue === value
-
-  useEffect(() => {
-    registerItem?.(value)
-
-    return () => unregisterItem?.(value)
-  }, [registerItem, unregisterItem, value])
+  const { isSelected, selectItem } = useMenuItemState(value)
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    onClick?.(event)
-
-    if (disabled || event.defaultPrevented) {
+    if (disabled) {
       event.preventDefault()
       return
     }
 
-    if (menu?.selectValue(value)) {
-      subMenu?.closeAfterItemSelection()
+    onClick?.(event)
+
+    if (event.defaultPrevented) {
+      return
     }
+
+    selectItem()
   }
 
   return (
@@ -47,6 +38,7 @@ export function MenuLinkItem({
         className={clsx('matthew-menu__item', isSelected && 'matthew-menu__item--selected', disabled && 'matthew-menu__item--disabled', className)}
         href={disabled ? undefined : href}
         onClick={handleClick}
+        role="link"
         tabIndex={disabled ? -1 : restProps.tabIndex}
       >
         {children}

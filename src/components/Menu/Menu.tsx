@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react'
 import clsx from 'clsx'
 import { MenuContext } from './menu.context'
 import { MenuItem } from './MenuItem'
@@ -19,6 +25,7 @@ function MenuRoot({
   defaultOpenValues,
   onOpenValuesChange,
   className,
+  onKeyDown,
   ...restProps
 }: MenuProps) {
   const menuElement = useRef<HTMLUListElement>(null)
@@ -144,6 +151,22 @@ function MenuRoot({
     setOpenValue(nextValue, !openValues.includes(nextValue))
   }
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
+    onKeyDown?.(event)
+
+    if (
+      event.defaultPrevented ||
+      event.key !== 'Escape' ||
+      mode !== 'horizontal' ||
+      openValues.length === 0
+    ) {
+      return
+    }
+
+    event.preventDefault()
+    changeOpenValues([])
+  }
+
   useEffect(() => {
     if (mode !== 'horizontal' || openValues.length === 0) {
       return
@@ -182,6 +205,7 @@ function MenuRoot({
       <ul
         {...restProps}
         className={clsx('matthew-menu', `matthew-menu--${mode}`, className)}
+        onKeyDown={handleKeyDown}
         ref={menuElement}
       >
         {children}

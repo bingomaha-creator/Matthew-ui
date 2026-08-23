@@ -1,5 +1,6 @@
 import { createRef } from 'react'
 import { AutoComplete } from '../../index'
+import type { AutoCompleteProps } from '../../index'
 
 type PlayerOption = {
   value: string
@@ -12,6 +13,30 @@ const players: PlayerOption[] = [
 ]
 const inputRef = createRef<HTMLInputElement>()
 const divRef = createRef<HTMLDivElement>()
+
+type OtherInputTypeProp =
+  | 'accept'
+  | 'alt'
+  | 'capture'
+  | 'formAction'
+  | 'formEncType'
+  | 'formMethod'
+  | 'formNoValidate'
+  | 'formTarget'
+  | 'height'
+  | 'max'
+  | 'min'
+  | 'multiple'
+  | 'src'
+  | 'step'
+  | 'width'
+
+const excludesOtherInputTypeProps: Extract<
+  keyof AutoCompleteProps,
+  OtherInputTypeProp
+> extends never
+  ? true
+  : false = true
 
 const genericAutoComplete = (
   <AutoComplete<PlayerOption>
@@ -68,6 +93,42 @@ const autoCompleteWithDivRef = (
   <AutoComplete ref={divRef} fetchSuggestions={() => []} />
 )
 
+const textAutoComplete = (
+  <AutoComplete type="text" fetchSuggestions={() => []} />
+)
+
+const searchAutoComplete = (
+  <AutoComplete type="search" fetchSuggestions={() => []} />
+)
+
+const autoCompleteWithCheckboxType = (
+  // @ts-expect-error AutoComplete 只支持文本与搜索输入类型
+  <AutoComplete type="checkbox" fetchSuggestions={() => []} />
+)
+
+const autoCompleteWithChecked = (
+  // @ts-expect-error AutoComplete 不公开 checkbox 的 checked 状态
+  <AutoComplete checked fetchSuggestions={() => []} />
+)
+
+const autoCompleteWithDefaultChecked = (
+  // @ts-expect-error AutoComplete 不公开 checkbox 的 defaultChecked 状态
+  <AutoComplete defaultChecked fetchSuggestions={() => []} />
+)
+
+const autoCompleteWithChildren = (
+  // @ts-expect-error 原生 input 是 void element，不能接收 children
+  <AutoComplete fetchSuggestions={() => []}>suggestion</AutoComplete>
+)
+
+const autoCompleteWithDangerousHtml = (
+  <AutoComplete
+    // @ts-expect-error 原生 input 不能接收 dangerouslySetInnerHTML
+    dangerouslySetInnerHTML={{ __html: 'suggestion' }}
+    fetchSuggestions={() => []}
+  />
+)
+
 void [
   genericAutoComplete,
   autoCompleteWithoutOptionValue,
@@ -77,4 +138,12 @@ void [
   autoCompleteWithNativeOnSelect,
   autoCompleteWithInputRef,
   autoCompleteWithDivRef,
+  textAutoComplete,
+  searchAutoComplete,
+  autoCompleteWithCheckboxType,
+  autoCompleteWithChecked,
+  autoCompleteWithDefaultChecked,
+  autoCompleteWithChildren,
+  autoCompleteWithDangerousHtml,
+  excludesOtherInputTypeProps,
 ]

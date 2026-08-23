@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import {
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Menu } from '../../index'
@@ -388,6 +392,68 @@ describe('Menu', () => {
       .toBeInTheDocument()
   })
 
+  test.each(['touch', 'pen'] as const)(
+    'does not schedule horizontal hover behavior for %s pointers',
+    async (pointerType) => {
+      const screen = await render(
+        <>
+          <button style={{ position: 'fixed', right: 0, bottom: 0 }}>
+            外部操作
+          </button>
+          <Menu>
+            <Menu.SubMenu title="组件" value="components">
+              <Menu.Item value="button">Button 示例</Menu.Item>
+            </Menu.SubMenu>
+          </Menu>
+        </>,
+      )
+      const components = screen.getByRole('button', { name: '组件' })
+
+      await screen.getByRole('button', { name: '外部操作' }).hover()
+      components.element().dispatchEvent(
+        new PointerEvent('pointerover', {
+          bubbles: true,
+          pointerType,
+        }),
+      )
+      await waitForHoverDelay()
+
+      await expect
+        .element(components)
+        .toHaveAttribute('aria-expanded', 'false')
+    },
+  )
+
+  test('lets SubMenu onPointerEnter prevent its internal hover behavior', async () => {
+    const onPointerEnter = vi.fn((event: ReactPointerEvent<HTMLLIElement>) =>
+      event.preventDefault(),
+    )
+    const screen = await render(
+      <Menu>
+        <Menu.SubMenu
+          onPointerEnter={onPointerEnter}
+          title="组件"
+          value="components"
+        >
+          <Menu.Item value="button">Button 示例</Menu.Item>
+        </Menu.SubMenu>
+      </Menu>,
+    )
+    const components = screen.getByRole('button', { name: '组件' })
+
+    components.element().dispatchEvent(
+      new PointerEvent('pointerover', {
+        bubbles: true,
+        cancelable: true,
+        pointerType: 'mouse',
+      }),
+    )
+    await waitForHoverDelay()
+
+    expect(onPointerEnter).toHaveBeenCalled()
+    await expect.element(components).toHaveAttribute('aria-expanded', 'false')
+  })
+
   test('closes an open horizontal submenu after the 300ms hover-leave delay', async () => {
     const screen = await render(
       <Menu defaultOpenValues={['components']}>
@@ -403,6 +469,31 @@ describe('Menu', () => {
     await waitForHoverDelay()
 
     await expect.element(components).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('lets SubMenu onPointerLeave prevent its internal hover behavior', async () => {
+    const onPointerLeave = vi.fn((event: ReactPointerEvent<HTMLLIElement>) =>
+      event.preventDefault(),
+    )
+    const screen = await render(
+      <Menu defaultOpenValues={['components']}>
+        <Menu.SubMenu
+          onPointerLeave={onPointerLeave}
+          title="组件"
+          value="components"
+        >
+          <Menu.Item value="button">Button 示例</Menu.Item>
+        </Menu.SubMenu>
+      </Menu>,
+    )
+    const components = screen.getByRole('button', { name: '组件' })
+
+    await components.hover()
+    await components.unhover()
+    await waitForHoverDelay()
+
+    expect(onPointerLeave).toHaveBeenCalledOnce()
+    await expect.element(components).toHaveAttribute('aria-expanded', 'true')
   })
 
   test('keeps a horizontal submenu open when the pointer re-enters before its close delay', async () => {
@@ -607,8 +698,14 @@ describe('Menu', () => {
   })
 
   test('closes with Escape and returns focus to the SubMenu trigger', async () => {
+    const onKeyDown = vi.fn()
+    const onOpenValuesChange = vi.fn()
     const screen = await render(
-      <Menu defaultOpenValues={['components']}>
+      <Menu
+        defaultOpenValues={['components']}
+        onKeyDown={onKeyDown}
+        onOpenValuesChange={onOpenValuesChange}
+      >
         <Menu.SubMenu title="组件" value="components">
           <Menu.Item value="button">Button 示例</Menu.Item>
         </Menu.SubMenu>
@@ -624,6 +721,147 @@ describe('Menu', () => {
 
     await expect.element(components).toHaveAttribute('aria-expanded', 'false')
     await expect.element(components).toHaveFocus()
+    expect(onKeyDown).toHaveBeenCalledOnce()
+    expect(onOpenValuesChange).toHaveBeenCalledExactlyOnceWith([])
+  })
+
+  test('closes with Escape from the SubMenu trigger without moving focus', async () => {
+    const screen = await render(
+      <Menu defaultOpenValues={['components']}>
+        <Menu.SubMenu title="组件" value="components">
+          <Menu.Item value="button">Button 示例</Menu.Item>
+        </Menu.SubMenu>
+      </Menu>,
+    )
+    const components = screen.getByRole('button', { name: '组件' })
+
+    ;(components.element() as HTMLButtonElement).focus()
+    components.element().dispatchEvent(
+      new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'Escape',
+      }),
+    )
+
+    await expect.element(components).toHaveAttribute('aria-expanded', 'false')
+    await expect.element(components).toHaveFocus()
+  })
+
+  test('coordinates sibling Escape through Root while preserving its onKeyDown', async () => {
+    const onKeyDown = vi.fn((event: ReactKeyboardEvent<HTMLUListElement>) => {
+      if (event.shiftKey) {
+        event.preventDefault()
+      }
+    })
+    const screen = await render(
+      <Menu defaultOpenValues={['components']} onKeyDown={onKeyDown}>
+        <Menu.SubMenu title="组件" value="components">
+          <Menu.Item value="button">Button 示例</Menu.Item>
+        </Menu.SubMenu>
+        <Menu.Item value="about">关于</Menu.Item>
+      </Menu>,
+    )
+    const components = screen.getByRole('button', { name: '组件' })
+    const sibling = screen.getByRole('button', { name: '关于' })
+
+    ;(sibling.element() as HTMLButtonElement).focus()
+    sibling.element().dispatchEvent(
+      new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'Escape',
+      }),
+    )
+
+    expect(onKeyDown).toHaveBeenCalledOnce()
+    await expect.element(components).toHaveAttribute('aria-expanded', 'false')
+    await expect.element(sibling).toHaveFocus()
+
+    await components.click()
+    ;(sibling.element() as HTMLButtonElement).focus()
+    sibling.element().dispatchEvent(
+      new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'Escape',
+        shiftKey: true,
+      }),
+    )
+
+    expect(onKeyDown).toHaveBeenCalledTimes(2)
+    await expect.element(components).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(sibling).toHaveFocus()
+  })
+
+  test('waits for controlled openValues to close after sibling Escape', async () => {
+    const onOpenValuesChange = vi.fn()
+    const renderMenu = (openValues: string[]) => (
+      <Menu
+        onOpenValuesChange={onOpenValuesChange}
+        openValues={openValues}
+      >
+        <Menu.SubMenu title="组件" value="components">
+          <Menu.Item value="button">Button 示例</Menu.Item>
+        </Menu.SubMenu>
+        <Menu.Item value="about">关于</Menu.Item>
+      </Menu>
+    )
+    const screen = await render(renderMenu(['components']))
+    const components = screen.getByRole('button', { name: '组件' })
+    const sibling = screen.getByRole('button', { name: '关于' })
+
+    await expect.element(components).toHaveAttribute('aria-expanded', 'true')
+    ;(sibling.element() as HTMLButtonElement).focus()
+    sibling.element().dispatchEvent(
+      new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'Escape',
+      }),
+    )
+
+    expect(onOpenValuesChange).toHaveBeenCalledExactlyOnceWith([])
+    await expect.element(components).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(sibling).toHaveFocus()
+
+    await screen.rerender(renderMenu([]))
+
+    await expect.element(components).toHaveAttribute('aria-expanded', 'false')
+    await expect.element(sibling).toHaveFocus()
+    expect(onOpenValuesChange).toHaveBeenCalledOnce()
+  })
+
+  test('lets SubMenu onKeyDown prevent its internal Escape behavior', async () => {
+    const onKeyDown = vi.fn((event: ReactKeyboardEvent<HTMLLIElement>) =>
+      event.preventDefault(),
+    )
+    const screen = await render(
+      <Menu defaultOpenValues={['components']}>
+        <Menu.SubMenu
+          onKeyDown={onKeyDown}
+          title="组件"
+          value="components"
+        >
+          <Menu.Item value="button">Button 示例</Menu.Item>
+        </Menu.SubMenu>
+      </Menu>,
+    )
+    const components = screen.getByRole('button', { name: '组件' })
+    const child = screen.getByRole('button', { name: 'Button 示例' })
+
+    ;(child.element() as HTMLButtonElement).focus()
+    child.element().dispatchEvent(
+      new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'Escape',
+      }),
+    )
+
+    expect(onKeyDown).toHaveBeenCalledOnce()
+    await expect.element(components).toHaveAttribute('aria-expanded', 'true')
+    await expect.element(child).toHaveFocus()
   })
 
   test('renders a real LinkItem and keeps disabled links out of navigation', async () => {
@@ -647,8 +885,82 @@ describe('Menu', () => {
     await expect.element(disabledLink).toHaveAttribute('aria-disabled', 'true')
     await expect.element(disabledLink).toHaveAttribute('tabindex', '-1')
 
-    await disabledLink.click()
+    ;(disabledLink.element() as HTMLAnchorElement).click()
 
     expect(onValueChange).not.toHaveBeenCalled()
+  })
+
+  test('does not activate or close for a disabled LinkItem', async () => {
+    const onClick = vi.fn()
+    const onValueChange = vi.fn()
+    const screen = await render(
+      <Menu
+        defaultOpenValues={['components']}
+        onValueChange={onValueChange}
+      >
+        <Menu.SubMenu title="组件" value="components">
+          <Menu.LinkItem
+            disabled
+            href="/guide"
+            onClick={onClick}
+            value="guide"
+          >
+            禁用指南
+          </Menu.LinkItem>
+        </Menu.SubMenu>
+      </Menu>,
+    )
+    const trigger = screen.getByRole('button', { name: '组件' })
+    const disabledLink = screen.getByText('禁用指南')
+
+    ;(disabledLink.element() as HTMLAnchorElement).click()
+
+    expect(onClick).not.toHaveBeenCalled()
+    expect(onValueChange).not.toHaveBeenCalled()
+    await expect.element(disabledLink).not.toHaveAttribute('href')
+    await expect.element(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  test('keeps LinkItem link semantics when callers spread conflicting props', async () => {
+    const conflictingProps = {
+      'aria-disabled': 'false',
+      role: 'button',
+    }
+    const screen = await render(
+      <Menu>
+        <Menu.LinkItem
+          {...conflictingProps}
+          disabled
+          href="/guide"
+          value="guide"
+        >
+          禁用指南
+        </Menu.LinkItem>
+      </Menu>,
+    )
+    const disabledLink = screen.getByRole('link', { name: '禁用指南' })
+
+    await expect.element(disabledLink).toHaveAttribute('role', 'link')
+    await expect
+      .element(disabledLink)
+      .toHaveAttribute('aria-disabled', 'true')
+  })
+
+  test('defaults Menu.Item to button type while preserving an explicit type', async () => {
+    const screen = await render(
+      <Menu>
+        <Menu.Item value="save">保存</Menu.Item>
+        <Menu.Item type="submit" value="publish">
+          发布
+        </Menu.Item>
+      </Menu>,
+    )
+
+    await expect
+      .element(screen.getByRole('button', { name: '保存' }))
+      .toHaveAttribute('type', 'button')
+    await expect
+      .element(screen.getByRole('button', { name: '发布' }))
+      .toHaveAttribute('type', 'submit')
   })
 })

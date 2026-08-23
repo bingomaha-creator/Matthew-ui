@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import clsx from 'clsx'
 import type {
   AutoCompleteOption,
   AutoCompleteProps,
@@ -15,6 +16,8 @@ export function AutoComplete<
   fetchSuggestions,
   disabled,
   readOnly,
+  className,
+  type = 'text',
   ref,
   ...inputProps
 }: AutoCompleteProps<T>) {
@@ -40,6 +43,38 @@ export function AutoComplete<
   const getOptionId = (option: T) =>
     listboxId + '-option-' + encodeURIComponent(option.value)
 
+  const clearSuggestionState = useCallback(() => {
+    setSuggestions([])
+    setSuggestionsQuery(null)
+    setActiveIndex(-1)
+    setIsOpen(false)
+    setLoading(false)
+  }, [])
+
+  const closeSuggestionList = useCallback(() => {
+    setActiveIndex(-1)
+    setIsOpen(false)
+  }, [])
+
+  const commitSuggestions = useCallback(
+    (nextSuggestions: T[], query: string) => {
+      setSuggestions(nextSuggestions)
+      setSuggestionsQuery(query)
+      setActiveIndex(-1)
+      setIsOpen(nextSuggestions.length > 0)
+      setLoading(false)
+    },
+    [],
+  )
+
+  const startLoading = useCallback((query: string) => {
+    setSuggestions([])
+    setSuggestionsQuery(query)
+    setActiveIndex(-1)
+    setIsOpen(true)
+    setLoading(true)
+  }, [])
+
   const selectOption = (option: T) => {
     requestVersion.current += 1
 
@@ -53,11 +88,7 @@ export function AutoComplete<
 
     onOptionSelect?.(option)
     setSearchInput(null)
-    setSuggestions([])
-    setSuggestionsQuery(null)
-    setActiveIndex(-1)
-    setIsOpen(false)
-    setLoading(false)
+    clearSuggestionState()
   }
 
   useEffect(() => {
@@ -76,13 +107,11 @@ export function AutoComplete<
 
       if (loadingRef.current) {
         requestVersion.current += 1
-        setSuggestions([])
-        setSuggestionsQuery(null)
-        setLoading(false)
+        clearSuggestionState()
+        return
       }
 
-      setIsOpen(false)
-      setActiveIndex(-1)
+      closeSuggestionList()
     }
 
     document.addEventListener('pointerdown', handlePointerDown)
@@ -90,7 +119,7 @@ export function AutoComplete<
       requestVersion.current += 1
       document.removeEventListener('pointerdown', handlePointerDown)
     }
-  }, [])
+  }, [clearSuggestionState, closeSuggestionList])
 
   useEffect(() => {
     if (
@@ -126,12 +155,19 @@ export function AutoComplete<
     requestVersion.current += 1
     pendingControlledValue.current = null
     setSearchInput(null)
-    setSuggestions([])
-    setSuggestionsQuery(null)
-    setActiveIndex(-1)
-    setIsOpen(false)
-    setLoading(false)
-  }, [isControlled, value])
+    clearSuggestionState()
+  }, [clearSuggestionState, isControlled, value])
+
+  useEffect(() => {
+    if (canInteract) {
+      return
+    }
+
+    requestVersion.current += 1
+    // Restriction changes invalidate async state before interaction resumes.
+    // oxlint-disable-next-line react/set-state-in-effect
+    clearSuggestionState()
+  }, [canInteract, clearSuggestionState])
 
   useEffect(() => {
     if (searchInput === null || !canInteract) {
@@ -151,26 +187,14 @@ export function AutoComplete<
       try {
         result = fetchSuggestionsRef.current(query)
       } catch {
-        setSuggestions([])
-        setSuggestionsQuery(null)
-        setActiveIndex(-1)
-        setIsOpen(false)
-        setLoading(false)
+        clearSuggestionState()
         return
       }
 
       if (Array.isArray(result)) {
-        setSuggestions(result)
-        setSuggestionsQuery(query)
-        setActiveIndex(-1)
-        setIsOpen(result.length > 0)
-        setLoading(false)
+        commitSuggestions(result, query)
       } else if (typeof result?.then === 'function') {
-        setSuggestions([])
-        setSuggestionsQuery(query)
-        setActiveIndex(-1)
-        setIsOpen(true)
-        setLoading(true)
+        startLoading(query)
 
         Promise.resolve(result).then(
           (data) => {
@@ -178,22 +202,14 @@ export function AutoComplete<
               return
             }
 
-            setSuggestions(data)
-            setSuggestionsQuery(query)
-            setActiveIndex(-1)
-            setIsOpen(data.length > 0)
-            setLoading(false)
+            commitSuggestions(data, query)
           },
           () => {
             if (version !== requestVersion.current) {
               return
             }
 
-            setSuggestions([])
-            setSuggestionsQuery(null)
-            setActiveIndex(-1)
-            setIsOpen(false)
-            setLoading(false)
+            clearSuggestionState()
           },
         )
       }
@@ -203,7 +219,13 @@ export function AutoComplete<
       requestVersion.current += 1
       window.clearTimeout(timer)
     }
-  }, [canInteract, searchInput])
+  }, [
+    canInteract,
+    clearSuggestionState,
+    commitSuggestions,
+    searchInput,
+    startLoading,
+  ])
 
   const activeOptionId =
     isOpen && canInteract && activeIndex >= 0
@@ -225,18 +247,17 @@ export function AutoComplete<
 
         if (loading) {
           requestVersion.current += 1
-          setSuggestions([])
-          setSuggestionsQuery(null)
-          setLoading(false)
+          clearSuggestionState()
+          return
         }
 
-        setIsOpen(false)
-        setActiveIndex(-1)
+        closeSuggestionList()
       }}
     >
       <input
         ref={ref}
         {...inputProps}
+        type={type === 'search' ? 'search' : 'text'}
         disabled={disabled}
         readOnly={readOnly}
         value={displayValue}
@@ -249,15 +270,14 @@ export function AutoComplete<
           requestVersion.current += 1
 
           if (!nextValue.trim()) {
-            setSuggestions([])
-            setSuggestionsQuery(null)
-            setIsOpen(false)
-            setLoading(false)
-          } else if (nextValue.trim() !== suggestionsQuery) {
-            setIsOpen(false)
-          }
+            clearSuggestionState()
+          } else {
+            if (nextValue.trim() !== suggestionsQuery) {
+              setIsOpen(false)
+            }
 
-          setActiveIndex(-1)
+            setActiveIndex(-1)
+          }
 
           if (isControlled) {
             pendingControlledValue.current = nextValue
@@ -278,7 +298,7 @@ export function AutoComplete<
         aria-controls={listboxId}
         aria-expanded={isOpen && canInteract}
         aria-activedescendant={activeOptionId}
-        className="matthew-auto-complete__input"
+        className={clsx('matthew-auto-complete__input', className)}
         onCompositionStart={(event) => {
           inputProps.onCompositionStart?.(event)
           isComposingRef.current = true
@@ -312,13 +332,10 @@ export function AutoComplete<
           if (!event.defaultPrevented && event.key === 'Tab' && isOpen) {
             if (loading) {
               requestVersion.current += 1
-              setSuggestions([])
-              setSuggestionsQuery(null)
-              setLoading(false)
+              clearSuggestionState()
+            } else {
+              closeSuggestionList()
             }
-
-            setIsOpen(false)
-            setActiveIndex(-1)
             return
           }
 
@@ -331,13 +348,10 @@ export function AutoComplete<
 
             if (loading) {
               requestVersion.current += 1
-              setSuggestions([])
-              setSuggestionsQuery(null)
-              setLoading(false)
+              clearSuggestionState()
+            } else {
+              closeSuggestionList()
             }
-
-            setIsOpen(false)
-            setActiveIndex(-1)
             return
           }
 

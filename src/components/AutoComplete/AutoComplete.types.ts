@@ -8,8 +8,32 @@ export type AutoCompleteProps<
   T extends AutoCompleteOption = AutoCompleteOption,
 > = Omit<
   ComponentPropsWithRef<'input'>,
-  'defaultValue' | 'onChange' | 'onSelect' | 'value'
+  | 'accept'
+  | 'alt'
+  | 'capture'
+  | 'checked'
+  | 'children'
+  | 'dangerouslySetInnerHTML'
+  | 'defaultChecked'
+  | 'defaultValue'
+  | 'formAction'
+  | 'formEncType'
+  | 'formMethod'
+  | 'formNoValidate'
+  | 'formTarget'
+  | 'height'
+  | 'max'
+  | 'min'
+  | 'multiple'
+  | 'onChange'
+  | 'onSelect'
+  | 'src'
+  | 'step'
+  | 'type'
+  | 'value'
+  | 'width'
 > & {
+  type?: 'text' | 'search'
   value?: string
   defaultValue?: string
   onValueChange?: (value: string) => void

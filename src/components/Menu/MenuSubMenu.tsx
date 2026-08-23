@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import clsx from 'clsx'
 import { MenuContext } from './menu.context'
 import { SubMenuContext } from './menu-submenu.context'
@@ -11,6 +11,9 @@ export function MenuSubMenu({
   title,
   value,
   className,
+  onKeyDown,
+  onPointerEnter,
+  onPointerLeave,
   ...restProps
 }: MenuSubMenuProps) {
   const context = useContext(MenuContext)
@@ -54,8 +57,8 @@ export function MenuSubMenu({
     }
   }, [registerSubMenu, unregisterSubMenu, value])
 
-  const scheduleHoverChange = (shouldOpen: boolean) => {
-    if (context?.mode !== 'horizontal') {
+  const scheduleHoverChange = (shouldOpen: boolean, pointerType: string) => {
+    if (context?.mode !== 'horizontal' || pointerType !== 'mouse') {
       return
     }
 
@@ -71,6 +74,26 @@ export function MenuSubMenu({
     context?.toggleOpenValue(value)
   }
 
+  const handlePointerEnter = (event: PointerEvent<HTMLLIElement>) => {
+    onPointerEnter?.(event)
+
+    if (event.defaultPrevented) {
+      return
+    }
+
+    scheduleHoverChange(true, event.pointerType)
+  }
+
+  const handlePointerLeave = (event: PointerEvent<HTMLLIElement>) => {
+    onPointerLeave?.(event)
+
+    if (event.defaultPrevented) {
+      return
+    }
+
+    scheduleHoverChange(false, event.pointerType)
+  }
+
   const closeAfterItemSelection = () => {
     if (context?.mode === 'horizontal') {
       context.setOpenValue(value, false)
@@ -78,6 +101,12 @@ export function MenuSubMenu({
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLLIElement>) => {
+    onKeyDown?.(event)
+
+    if (event.defaultPrevented) {
+      return
+    }
+
     if (event.key !== 'Escape' || context?.mode !== 'horizontal' || !isOpen) {
       return
     }
@@ -92,8 +121,8 @@ export function MenuSubMenu({
       {...restProps}
       className={clsx('matthew-menu__submenu', isOpen && 'matthew-menu__submenu--open', hasSelectedDescendant && 'matthew-menu__submenu--descendant-active', className)}
       onKeyDown={handleKeyDown}
-      onPointerEnter={() => scheduleHoverChange(true)}
-      onPointerLeave={() => scheduleHoverChange(false)}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
     >
       <button
         aria-expanded={isOpen}

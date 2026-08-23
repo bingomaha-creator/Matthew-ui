@@ -1,28 +1,18 @@
-import { useContext, useEffect, type MouseEvent } from 'react'
+import type { MouseEvent } from 'react'
 import clsx from 'clsx'
-import { MenuContext } from './menu.context'
-import { SubMenuContext } from './menu-submenu.context'
 import type { MenuItemProps } from './menu.types'
+import { useMenuItemState } from './use-menu-item-state'
 
 export function MenuItem({
   children,
   disabled,
   onClick,
+  type = 'button',
   value,
   className,
   ...restProps
 }: MenuItemProps) {
-  const menu = useContext(MenuContext)
-  const subMenu = useContext(SubMenuContext)
-  const registerItem = subMenu?.registerItem
-  const unregisterItem = subMenu?.unregisterItem
-  const isSelected = menu?.selectedValue === value
-
-  useEffect(() => {
-    registerItem?.(value)
-
-    return () => unregisterItem?.(value)
-  }, [registerItem, unregisterItem, value])
+  const { isSelected, selectItem } = useMenuItemState(value)
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     onClick?.(event)
@@ -31,9 +21,7 @@ export function MenuItem({
       return
     }
 
-    if (menu?.selectValue(value)) {
-      subMenu?.closeAfterItemSelection()
-    }
+    selectItem()
   }
 
   return (
@@ -44,6 +32,7 @@ export function MenuItem({
         className={clsx('matthew-menu__item', isSelected && 'matthew-menu__item--selected', disabled && 'matthew-menu__item--disabled', className)}
         disabled={disabled}
         onClick={handleClick}
+        type={type}
       >
         {children}
       </button>
