@@ -16,3 +16,9 @@ export type {
   MenuProps,
   MenuSubMenuProps,
 } from './components/Menu'
+
+export { AutoComplete } from './components/AutoComplete'
+export type {
+  AutoCompleteOption,
+  AutoCompleteProps,
+} from './components/AutoComplete'

@@ -58,7 +58,12 @@ export default mergeConfig(
           ],
           // 浏览器环境必须在测试开始前完成这些 CommonJS 依赖的 ESM 转换。
           optimizeDeps: {
-            include: ['aria-query', 'lz-string', 'pretty-format'],
+            include: [
+              'aria-query',
+              'lz-string',
+              'pretty-format',
+              'storybook/test',
+            ],
           },
           test: {
             name: 'storybook',
