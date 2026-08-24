@@ -1,13 +1,22 @@
-# matthew-ui
+# Matthew UI
 
-Matthew UI 是一个使用 React 和 TypeScript 构建的 UI 组件库，目前提供 Button、Menu 和 AutoComplete。项目处于 `0.x` 学习与迭代阶段，公开 API 仍可能调整。
+[![npm version](https://img.shields.io/npm/v/matthew-ui?label=npm)](https://www.npmjs.com/package/matthew-ui)
+[![CI](https://github.com/bingomaha-creator/Matthew-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/bingomaha-creator/Matthew-ui/actions/workflows/ci.yml)
+[![Storybook](https://img.shields.io/badge/Storybook-online-ff4785?logo=storybook&logoColor=white)](https://bingomaha-creator.github.io/Matthew-ui/)
+[![License](https://img.shields.io/npm/l/matthew-ui)](./LICENSE)
+
+Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu 和 AutoComplete。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
+
+- [npm 包：`matthew-ui`](https://www.npmjs.com/package/matthew-ui)
+- [在线 Storybook](https://bingomaha-creator.github.io/Matthew-ui/)
 
 ## 特性
 
 - 支持 React 18.2 和 React 19。
 - 提供 ESM、CommonJS 和 TypeScript 类型声明。
 - 组件逻辑与样式入口分离，样式由使用者显式引入。
-- 核心交互通过 Vitest、Playwright 和 Storybook 验证。
+- 通过 Vitest Browser Mode、Playwright 和 Storybook 在真实 Chromium 中验证核心交互。
+- 通过 GitHub Actions 执行持续集成并部署在线 Storybook。
 
 ## 安装
 
@@ -21,6 +30,16 @@ npm install matthew-ui
 
 ```tsx
 import 'matthew-ui/styles.css'
+```
+
+随后从包根入口引入组件：
+
+```tsx
+import { Button } from 'matthew-ui'
+
+export function App() {
+  return <Button variant="primary">保存</Button>
+}
 ```
 
 ## 组件
@@ -118,6 +137,12 @@ export function PlayerSearch() {
 | `matthew-ui/styles.css` | 全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
+
+## 质量验证
+
+- 104 个组件级浏览器测试用例，覆盖 DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
+- 17 个 Story 场景，用于验证公开示例、交互行为和可访问性规则。
+- 真实 `npm pack` tarball 会分别安装到 React 18.2 与 React 19 临时消费端，验证 ESM、CommonJS、类型、CSS、DOM ref 和公开入口边界。
 
 ## 本地开发
 
