@@ -2,6 +2,8 @@ import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
+const externalPackages = ['clsx', 'react', 'react-dom']
+
 export default defineConfig({
   plugins: [react()],
   build: {
@@ -9,16 +11,14 @@ export default defineConfig({
       entry: resolve(import.meta.dirname, 'src/index.ts'),
       formats: ['es', 'cjs'],
       fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
-      cssFileName: 'styles',
     },
     sourcemap: true,
     rollupOptions: {
-      external: [
-        'react',
-        'react-dom',
-        'react/jsx-runtime',
-        'react/jsx-dev-runtime',
-      ],
+      external: (id) =>
+        externalPackages.some(
+          (packageName) =>
+            id === packageName || id.startsWith(`${packageName}/`),
+        ),
     },
   },
 })

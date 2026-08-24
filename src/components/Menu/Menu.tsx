@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ReactElement,
 } from 'react'
 import clsx from 'clsx'
 import { MenuContext } from './menu.context'
@@ -27,7 +28,7 @@ function MenuRoot({
   className,
   onKeyDown,
   ...restProps
-}: MenuProps) {
+}: MenuProps): ReactElement {
   const menuElement = useRef<HTMLUListElement>(null)
   const [uncontrolledSelectedValue, setUncontrolledSelectedValue] =
     useState(defaultValue)

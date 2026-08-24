@@ -1,4 +1,13 @@
-import { useCallback, useContext, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactElement,
+} from 'react'
 import clsx from 'clsx'
 import { MenuContext } from './menu.context'
 import { SubMenuContext } from './menu-submenu.context'
@@ -15,7 +24,7 @@ export function MenuSubMenu({
   onPointerEnter,
   onPointerLeave,
   ...restProps
-}: MenuSubMenuProps) {
+}: MenuSubMenuProps): ReactElement {
   const context = useContext(MenuContext)
   const trigger = useRef<HTMLButtonElement>(null)
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null)

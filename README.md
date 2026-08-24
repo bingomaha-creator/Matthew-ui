@@ -1,33 +1,39 @@
 # matthew-ui
 
-一个用于系统学习现代 React 组件库设计的项目。
+Matthew UI 是一个使用 React 和 TypeScript 构建的 UI 组件库，目前提供 Button、Menu 和 AutoComplete。项目处于 `0.x` 学习与迭代阶段，公开 API 仍可能调整。
 
-## 当前工具链
+## 特性
 
-- React 19
-- TypeScript 6
-- Vite 7 library mode
-- Vitest 4 browser mode + Playwright
-- Storybook 10（docs、component test、a11y）
-- Sass
-- Oxlint
+- 支持 React 18.2 和 React 19。
+- 提供 ESM、CommonJS 和 TypeScript 类型声明。
+- 组件逻辑与样式入口分离，样式由使用者显式引入。
+- 核心交互通过 Vitest、Playwright 和 Storybook 验证。
 
-React 和 React DOM 同时作为开发依赖与 peer dependencies：项目本身需要它们来开发和测试，但发布后的库不会把自己的 React 副本打进产物。
+## 安装
 
-Vite 暂时固定在 7.3.6。Vite 8 的 Rolldown 依赖优化器目前会破坏 Storybook + Vitest browser mode 使用的 CommonJS 互操作，问题记录见 [vitejs/vite#23030](https://github.com/vitejs/vite/issues/23030)。
+```bash
+npm install matthew-ui
+```
 
-## 使用 Button
+项目要求 React 与 React DOM 版本满足 `^18.2.0 || ^19.0.0`，Node.js 版本满足 `^20.19.0 || >=22.12.0`。
 
-组件逻辑和样式分别导入：
+在应用入口引入一次组件样式：
+
+```tsx
+import 'matthew-ui/styles.css'
+```
+
+## 组件
+
+### Button 与 LinkButton
 
 ```tsx
 import { Button, LinkButton } from 'matthew-ui'
-import 'matthew-ui/styles.css'
 
 export function Actions() {
   return (
     <>
-      <Button variant="primary" size="lg">
+      <Button size="lg" variant="primary">
         保存
       </Button>
       <LinkButton href="/docs" variant="secondary">
@@ -38,59 +44,95 @@ export function Actions() {
 }
 ```
 
-`variant` 支持 `primary | secondary | danger`，`size` 支持 `sm | md | lg`。
+`variant` 支持 `primary | secondary | danger`，`size` 支持 `sm | md | lg`。`Button` 默认使用安全的 `type="button"`；`LinkButton` 的 `href` 必填，禁用时会保持链接语义并阻止导航。
 
-`LinkButton` 始终保持链接语义，不允许通过 `role` 将其改成按钮或其他角色。禁用时仍需传入 `href` 作为组件的导航目标，但最终 DOM 会移除 `href`，设置 `aria-disabled="true"` 和 `tabIndex={-1}`，并阻止用户传入的 `onClick`。重新启用后，`href` 会恢复。
+### Menu
 
-## 常用命令
+```tsx
+import { Menu } from 'matthew-ui'
+
+export function Navigation() {
+  return (
+    <Menu
+      aria-label="组件导航"
+      defaultOpenValues={['components']}
+      defaultValue="button"
+      mode="vertical"
+    >
+      <Menu.LinkItem href="/" value="home">
+        首页
+      </Menu.LinkItem>
+      <Menu.SubMenu title="组件" value="components">
+        <Menu.LinkItem href="/components/button" value="button">
+          Button
+        </Menu.LinkItem>
+        <Menu.Item value="refresh" onClick={() => console.log('refresh')}>
+          刷新
+        </Menu.Item>
+      </Menu.SubMenu>
+    </Menu>
+  )
+}
+```
+
+`Menu.Item`、`Menu.LinkItem` 和 `Menu.SubMenu` 都使用稳定的字符串 `value` 标识身份。`mode` 默认为 `horizontal`：横向模式最多展开一个 SubMenu，`vertical` 模式允许同时展开多个。选择状态支持 `value/onValueChange` 或 `defaultValue`，展开状态支持 `openValues/onOpenValuesChange` 或 `defaultOpenValues`。
+
+### AutoComplete
+
+```tsx
+import { AutoComplete } from 'matthew-ui'
+
+type Player = {
+  value: string
+  number: number
+}
+
+const players: Player[] = [
+  { value: 'james', number: 23 },
+  { value: 'caruso', number: 4 },
+]
+
+export function PlayerSearch() {
+  return (
+    <AutoComplete<Player>
+      aria-label="搜索球员"
+      fetchSuggestions={(query) =>
+        players.filter((player) =>
+          player.value.includes(query.toLowerCase()),
+        )
+      }
+      onOptionSelect={(player) => console.log(player.number)}
+      renderOption={(player) => `${player.value} #${player.number}`}
+    />
+  )
+}
+```
+
+每个建议项至少需要唯一的字符串 `value`。`fetchSuggestions` 可以返回数组或 Promise；`onValueChange` 接收输入字符串，`onOptionSelect` 接收完整建议对象。组件支持 `value/onValueChange` 受控模式或 `defaultValue` 非受控模式，并内置 300ms 查询防抖。
+
+## 公开入口
+
+| 入口 | 内容 |
+| --- | --- |
+| `matthew-ui` | 组件及 TypeScript 类型 |
+| `matthew-ui/styles.css` | 全部组件样式 |
+
+组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
+
+## 本地开发
 
 ```bash
 npm run dev
 npm run typecheck
 npm run lint
-npm run test
 npm run test:run
 npm run test:stories
 npm run build
-npm run build-storybook
+npm run verify:package
 ```
 
-`npm run test` 进入单元测试监听模式；`npm run test:run` 单次运行。单元测试与 Storybook 测试都使用真实 Chromium，而不是 JSDOM。
+`npm run verify:package` 会构建真实 npm tarball，并在临时 React 18.2 与 React 19 项目中验证安装、类型、入口和 DOM ref；它不会执行 `npm publish`。
 
-## TDD 约定
+## License
 
-测试只经过公开 interface，观察最终 DOM、用户交互和关键视觉类，不直接调用私有函数或内部类名生成工具：
-
-```text
-失败测试（Red）
-        ↓
-最小实现（Green）
-        ↓
-下一条公开行为
-```
-
-## 目录约定
-
-```text
-src/
-  index.ts
-  styles/
-    _tokens.scss
-    _mixins.scss
-    index.scss
-  components/
-    Button/
-      Button.tsx
-      LinkButton.tsx
-      Button.scss
-      *.test.tsx
-      *.type-test.tsx
-      *.stories.tsx
-
-.storybook/
-vite.config.ts
-vitest.config.ts
-tsconfig.build.json
-```
-
-项目暂时保持 `private: true`，防止学习过程中误发布；准备发布时再显式移除。
+[MIT](./LICENSE)

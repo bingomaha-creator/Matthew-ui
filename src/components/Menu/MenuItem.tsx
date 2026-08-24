@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react'
+import type { MouseEvent, ReactElement } from 'react'
 import clsx from 'clsx'
 import type { MenuItemProps } from './menu.types'
 import { useMenuItemState } from './use-menu-item-state'
@@ -11,7 +11,7 @@ export function MenuItem({
   value,
   className,
   ...restProps
-}: MenuItemProps) {
+}: MenuItemProps): ReactElement {
   const { isSelected, selectItem } = useMenuItemState(value)
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {

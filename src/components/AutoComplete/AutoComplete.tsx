@@ -1,11 +1,24 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react'
+import type { ForwardedRef, ReactElement } from 'react'
 import clsx from 'clsx'
 import type {
   AutoCompleteOption,
   AutoCompleteProps,
 } from './AutoComplete.types'
 
-export function AutoComplete<
+type AutoCompleteRenderProps<T extends AutoCompleteOption> = Omit<
+  AutoCompleteProps<T>,
+  'ref'
+>
+
+function AutoCompleteImpl<
   T extends AutoCompleteOption = AutoCompleteOption,
 >({
   value,
@@ -18,9 +31,8 @@ export function AutoComplete<
   readOnly,
   className,
   type = 'text',
-  ref,
   ...inputProps
-}: AutoCompleteProps<T>) {
+}: AutoCompleteRenderProps<T>, ref: ForwardedRef<HTMLInputElement>) {
   const listboxId = useId()
   const isControlled = value !== undefined
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue ?? '')
@@ -421,3 +433,9 @@ export function AutoComplete<
     </div>
   )
 }
+
+export const AutoComplete = forwardRef(AutoCompleteImpl) as <
+  T extends AutoCompleteOption = AutoCompleteOption,
+>(
+  props: AutoCompleteProps<T>,
+) => ReactElement | null

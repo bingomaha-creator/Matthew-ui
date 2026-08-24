@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import type {
   ComponentPropsWithRef,
   MouseEvent as ReactMouseEvent,
@@ -18,17 +19,25 @@ export type LinkButtonProps = LinkButtonOwnProps &
     keyof LinkButtonOwnProps | 'aria-disabled' | 'role'
   >
 
-export function LinkButton({
-  children,
-  href,
-  disabled = false,
-  variant = 'secondary',
-  size = 'md',
-  className,
-  onClick,
-  tabIndex,
-  ...anchorProps
-}: LinkButtonProps) {
+type LinkButtonRenderProps = Omit<LinkButtonProps, 'ref'>
+
+export const LinkButton = forwardRef<
+  HTMLAnchorElement,
+  LinkButtonRenderProps
+>(function LinkButton(
+  {
+    children,
+    href,
+    disabled = false,
+    variant = 'secondary',
+    size = 'md',
+    className,
+    onClick,
+    tabIndex,
+    ...anchorProps
+  },
+  ref,
+) {
   const handleClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
     if (disabled) {
       event.preventDefault()
@@ -41,6 +50,7 @@ export function LinkButton({
   return (
     <a
       {...anchorProps}
+      ref={ref}
       className={createButtonClassName({
         variant,
         size,
@@ -56,4 +66,4 @@ export function LinkButton({
       {children}
     </a>
   )
-}
+})

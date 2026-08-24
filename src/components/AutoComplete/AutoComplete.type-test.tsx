@@ -51,6 +51,18 @@ const genericAutoComplete = (
   />
 )
 
+const inferredGenericAutoComplete = (
+  <AutoComplete
+    fetchSuggestions={() => players}
+    onOptionSelect={(player) => {
+      const selectedNumber: number = player.number
+      // @ts-expect-error 泛型推导保留 number，而不是退化为 any
+      player.number.toUpperCase()
+      void selectedNumber
+    }}
+  />
+)
+
 const autoCompleteWithoutOptionValue = (
   // @ts-expect-error 建议类型必须包含用于身份和回填的 value
   <AutoComplete<{ label: string }>
@@ -131,6 +143,7 @@ const autoCompleteWithDangerousHtml = (
 
 void [
   genericAutoComplete,
+  inferredGenericAutoComplete,
   autoCompleteWithoutOptionValue,
   autoCompleteWithNumericValue,
   autoCompleteWithNumericDefaultValue,

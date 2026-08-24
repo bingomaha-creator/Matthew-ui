@@ -122,36 +122,45 @@ describe('AutoComplete basic and value selection', () => {
   })
 
   test('preserves raw input and searches the trimmed query after 300ms', async () => {
-    const onValueChange = vi.fn()
-    const fetchSuggestions = vi.fn(() => [
-      { value: 'james' },
-      { value: 'jarvis' },
-    ])
-    const screen = await render(
-      <AutoComplete
-        aria-label="搜索球员"
-        fetchSuggestions={fetchSuggestions}
-        onValueChange={onValueChange}
-      />,
-    )
-    const input = screen.getByRole('combobox', { name: '搜索球员' })
+    vi.useFakeTimers()
 
-    await input.fill('  ja ')
+    try {
+      const onValueChange = vi.fn()
+      const fetchSuggestions = vi.fn(() => [
+        { value: 'james' },
+        { value: 'jarvis' },
+      ])
+      const screen = await render(
+        <AutoComplete
+          aria-label="搜索球员"
+          fetchSuggestions={fetchSuggestions}
+          onValueChange={onValueChange}
+        />,
+      )
+      const input = screen.getByRole('combobox', { name: '搜索球员' })
 
-    await expect.element(input).toHaveValue('  ja ')
-    expect(onValueChange).toHaveBeenCalledExactlyOnceWith('  ja ')
-    expect(fetchSuggestions).not.toHaveBeenCalled()
+      await input.fill('  ja ')
 
-    await waitForDebounce()
+      await expect.element(input).toHaveValue('  ja ')
+      expect(onValueChange).toHaveBeenCalledExactlyOnceWith('  ja ')
 
-    expect(fetchSuggestions).toHaveBeenCalledExactlyOnceWith('ja')
-    await expect.element(screen.getByRole('listbox')).toBeInTheDocument()
-    await expect
-      .element(screen.getByRole('option', { name: 'james' }))
-      .toBeInTheDocument()
-    await expect
-      .element(screen.getByRole('option', { name: 'jarvis' }))
-      .toBeInTheDocument()
+      await vi.advanceTimersByTimeAsync(299)
+      expect(fetchSuggestions).not.toHaveBeenCalled()
+
+      await vi.advanceTimersByTimeAsync(1)
+      expect(fetchSuggestions).toHaveBeenCalledExactlyOnceWith('ja')
+
+      vi.useRealTimers()
+      await expect.element(screen.getByRole('listbox')).toBeInTheDocument()
+      await expect
+        .element(screen.getByRole('option', { name: 'james' }))
+        .toBeInTheDocument()
+      await expect
+        .element(screen.getByRole('option', { name: 'jarvis' }))
+        .toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   test('reflects external controlled values without searching them', async () => {
