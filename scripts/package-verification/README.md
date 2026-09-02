@@ -6,6 +6,7 @@
 | 文件 | 职责 |
 | --- | --- |
 | `../verify-package.mjs` | 创建临时目录、解包、组织检查、汇总失败、最终清理 |
+| `command-environment.mjs` | 隔离全部子命令的 npm cache，并关闭从外层 publish 继承的 dry-run |
 | `pack-tarball.mjs` | 生成真实验证 tarball；显式关闭从 `npm publish --dry-run` 继承的子命令 dry-run |
 | `package-checks.mjs` | 完整发布文件树的引用可达性、manifest、README、公开声明与依赖合同 |
 | `style-checks.mjs` | Token/组件/全量 CSS 内容、CSS/JS source map、Chromium 计算样式 |
@@ -46,7 +47,7 @@ Fixture 是消费端代码，不是本库源码；其中 `matthew-ui` 必须解�
 # 首次安装依赖后准备 Chromium；CI 已包含此步骤
 npx playwright install chromium
 
-# 构建后运行验证器的35条回归测试，不安装 React 双版本消费项目
+# 构建后运行验证器的36条回归测试，不安装 React 双版本消费项目
 npm run test:package-checks
 
 # 包含上述回归测试，再打包并验证 React 18.2/19 真实消费

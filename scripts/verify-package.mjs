@@ -9,6 +9,7 @@ import {
 } from './package-verification/package-checks.mjs'
 import { checkStyles } from './package-verification/style-checks.mjs'
 import { checkConsumers } from './package-verification/consumer-checks.mjs'
+import { createVerificationCommandEnvironment } from './package-verification/command-environment.mjs'
 import { packTarball } from './package-verification/pack-tarball.mjs'
 
 // 总入口只负责临时环境、命令执行、流程编排、失败汇总和最终清理。
@@ -24,11 +25,10 @@ const run = (command, args, options = {}) =>
   new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: options.cwd ?? projectRoot,
-      env: {
-        ...process.env,
-        npm_config_cache: npmCache,
-        ...options.env,
-      },
+      env: createVerificationCommandEnvironment({
+        npmCache,
+        overrides: options.env,
+      }),
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: options.timeout ?? 300_000,
     })
