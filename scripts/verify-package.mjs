@@ -1,4 +1,3 @@
-import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
@@ -10,6 +9,7 @@ import {
 } from './package-verification/package-checks.mjs'
 import { checkStyles } from './package-verification/style-checks.mjs'
 import { checkConsumers } from './package-verification/consumer-checks.mjs'
+import { packTarball } from './package-verification/pack-tarball.mjs'
 
 // 总入口只负责临时环境、命令执行、流程编排、失败汇总和最终清理。
 const projectRoot = fileURLToPath(new URL('../', import.meta.url))
@@ -78,18 +78,11 @@ const check = async (label, callback) => {
 
 try {
   console.log('Creating npm tarball...')
-  const packOutput = await run(npmCommand, [
-    'pack',
-    '--json',
-    '--pack-destination',
+  const { tarballPath, packageFiles } = await packTarball({
+    npmCommand,
+    run,
     temporaryDirectory,
-  ])
-  const [packResult] = JSON.parse(packOutput)
-
-  assert.ok(packResult, 'npm pack did not return a package result')
-
-  const tarballPath = join(temporaryDirectory, packResult.filename)
-  const packageFiles = packResult.files.map(({ path }) => path).sort()
+  })
 
   await checkPackageFiles({ packageFiles, check })
 
