@@ -104,7 +104,7 @@ ThemeProvider 会渲染一个局部 `div` wrapper，并把完整 Token 序列化
 
 ### Button 组件定制
 
-以下能力对应当前源码，尚未发布为新的 npm 版本。
+以下能力已随 `matthew-ui@0.2.0` 发布。
 
 ```tsx
 import { Button, LinkButton, ThemeProvider } from 'matthew-ui'
@@ -174,8 +174,8 @@ Button 与 LinkButton 共用下列10个可选字段；未配置的字段继续�
 
 ### Menu 组件定制
 
-当前源码已完成 `theme.components.Menu` 的配置、样式接线与真实包验收，
-此能力尚未发布新 npm 版本。
+`theme.components.Menu` 的配置、样式接线与真实包验收已随
+`matthew-ui@0.2.0` 发布。
 
 ```tsx
 import { Menu } from 'matthew-ui/menu'
@@ -238,8 +238,8 @@ export function Navigation() {
 
 ### AutoComplete 组件定制
 
-当前源码支持 `theme.components.AutoComplete` 的17字段配置、校验、嵌套继承和样式消费；
-此能力尚未发布新 npm 版本。
+`theme.components.AutoComplete` 的17字段配置、校验、嵌套继承和样式消费已随
+`matthew-ui@0.2.0` 发布。
 
 ```tsx
 import { AutoComplete } from 'matthew-ui/auto-complete'

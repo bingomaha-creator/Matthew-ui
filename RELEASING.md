@@ -2,17 +2,17 @@
 
 ## Current state
 
-- `matthew-ui@0.1.0` is published on npm with `latest=0.1.0`.
-- Registry `gitHead` and remote `v0.1.0` resolve to `baa1c6d`. The release
-  was created from `main` at that commit.
+- `matthew-ui@0.2.0` is published on npm with `latest=0.2.0`.
+- Registry `gitHead`, remote `v0.2.0`, and the GitHub Release resolve to
+  `8f3ccf8da39c8bd03916b1da6e4fe079d9516cb4`.
+- `0.2.0` was the first normal OIDC release. It was published by the protected
+  GitHub `npm-release` environment through npm Trusted Publishing.
 - `0.1.0` was a one-time local bootstrap publish because a brand-new package
   cannot configure Trusted Publishing or use npm Staged Publishing first.
 - `v0.1.0` intentionally has no GitHub Release. Creating one with the current
   workflow would try to publish the already-existing npm version again.
 - GitHub Pages, `github-pages`, and the protected `npm-release` environment are
-  configured. The npm Trusted Publisher is configured for future releases.
-
-The first normal OIDC release is planned as `0.2.0`.
+  configured for future releases.
 
 ## Security model
 
@@ -32,7 +32,9 @@ stay logged in to npm locally for normal releases.
 ## Prepare a stable release
 
 The repository currently accepts stable `x.y.z` versions only. The following
-steps prepare and release `0.2.0`.
+commands record the completed `0.2.0` release as a concrete reference. Do not
+rerun them for `0.2.0`; replace every version occurrence with the exact next
+version when preparing a future release.
 
 1. Start from a clean and current `main`, then run the normal quality gate:
 
