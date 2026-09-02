@@ -6,18 +6,24 @@
   width: 100%;
   color: var(--matthew-ui-color-text);
   font: inherit;
+  // 只消费变量并提供回退，不在组件根节点填默认变量而截断祖先CSS继承。
+  font-size: var(--matthew-ui-auto-complete-font-size, var(--matthew-ui-font-size-md));
 
   &__input {
     display: block;
     box-sizing: border-box;
     width: 100%;
-    min-height: 2.5rem;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--matthew-ui-color-border);
-    border-radius: var(--matthew-ui-radius-md);
-    background: var(--matthew-ui-color-surface);
-    color: var(--matthew-ui-color-text);
+    min-height: var(--matthew-ui-auto-complete-input-min-height, var(--matthew-ui-control-height-md));
+    padding-block: var(--matthew-ui-auto-complete-input-padding-block, 0.5rem);
+    padding-inline: var(--matthew-ui-auto-complete-input-padding-inline, 0.75rem);
+    border: 1px solid var(--matthew-ui-auto-complete-border-color, var(--matthew-ui-color-border));
+    border-radius: var(--matthew-ui-auto-complete-input-radius, var(--matthew-ui-radius-md));
+    background: var(--matthew-ui-auto-complete-input-background, var(--matthew-ui-color-surface));
+    color: var(--matthew-ui-auto-complete-input-color, var(--matthew-ui-color-text));
     font: inherit;
+    // 必须放在font简写后；input自身的style/class变量也可以形成局部例外。
+    // input与下拉ul是兄弟节点，此处的覆盖不会传递到下拉列表。
+    font-size: var(--matthew-ui-auto-complete-font-size, var(--matthew-ui-font-size-md));
     line-height: 1.5;
     transition:
       border-color var(--matthew-ui-duration-fast) ease,
@@ -31,9 +37,10 @@
     }
 
     &:hover:not(:disabled):not(:read-only) {
-      border-color: var(--matthew-ui-color-primary);
+      border-color: var(--matthew-ui-auto-complete-input-hover-border-color, var(--matthew-ui-color-primary));
     }
 
+    // 状态背景优先于普通inputBackground，但不清空显式文字色/普通边框。
     &:disabled {
       background: var(--matthew-ui-color-surface-hover);
       opacity: 0.6;
@@ -57,10 +64,11 @@
     margin: 0;
     padding: 0.25rem;
     overflow-y: auto;
-    border: 1px solid var(--matthew-ui-color-border);
+    border: 1px solid var(--matthew-ui-auto-complete-border-color, var(--matthew-ui-color-border));
     border-radius: var(--matthew-ui-radius-md);
-    background: var(--matthew-ui-color-surface);
-    box-shadow: 0 0.75rem 1.5rem rgb(15 23 42 / 12%);
+    // 浮层独立于输入背景；未定制阴影时也随全局亮/暗主题切换。
+    background: var(--matthew-ui-auto-complete-popup-background, var(--matthew-ui-color-surface));
+    box-shadow: var(--matthew-ui-auto-complete-popup-shadow, var(--matthew-ui-shadow-overlay));
     list-style: none;
   }
 
@@ -68,21 +76,25 @@
   &__loading {
     box-sizing: border-box;
     width: 100%;
-    padding: 0.625rem 0.75rem;
-    border-radius: calc(var(--matthew-ui-radius-md) - 0.125rem);
+    // 建议项和加载行共用几何尺寸，但加载文字不使用候选高亮配色。
+    padding-block: var(--matthew-ui-auto-complete-option-padding-block, 0.625rem);
+    padding-inline: var(--matthew-ui-auto-complete-option-padding-inline, 0.75rem);
+    border-radius: var(--matthew-ui-auto-complete-option-radius, max(0px, calc(var(--matthew-ui-radius-md) - 0.125rem)));
     overflow-wrap: anywhere;
   }
 
   &__option {
+    color: var(--matthew-ui-auto-complete-option-color, var(--matthew-ui-color-text));
     cursor: pointer;
     transition:
       background-color var(--matthew-ui-duration-fast) ease,
       color var(--matthew-ui-duration-fast) ease;
 
+    // active指当前候选而非已提交值；保留hover与键盘候选可并行高亮的规则。
     &:hover,
     &[aria-selected='true'] {
-      background: var(--matthew-ui-color-surface-active);
-      color: var(--matthew-ui-color-primary-active);
+      background: var(--matthew-ui-auto-complete-option-active-background, var(--matthew-ui-color-surface-active));
+      color: var(--matthew-ui-auto-complete-option-active-color, var(--matthew-ui-color-primary-active));
     }
 
     &[aria-selected='true'] {

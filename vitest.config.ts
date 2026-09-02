@@ -38,7 +38,8 @@ export default mergeConfig(
         {
           extends: true,
           optimizeDeps: {
-            include: ['vitest-browser-react'],
+            // SSR 配置测试也使用真实 React renderer，预构建避免测试中途重载/重复 React。
+            include: ['vitest-browser-react', 'react-dom/server'],
           },
           test: {
             name: 'unit',

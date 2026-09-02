@@ -1,6 +1,7 @@
 @use '../../styles/mixins' as mixins;
 
 .matthew-button {
+  // 旧变量只负责 variant 默认映射；新的 --matthew-ui-button-* 留给使用者覆盖。
   --matthew-button-background: var(--matthew-ui-color-surface);
   --matthew-button-background-hover: var(--matthew-ui-color-surface-hover);
   --matthew-button-background-active: var(--matthew-ui-color-surface-active);
@@ -12,10 +13,11 @@
   justify-content: center;
   box-sizing: border-box;
   min-width: max-content;
-  border: 1px solid var(--matthew-button-border);
-  border-radius: var(--matthew-ui-radius-md);
-  background: var(--matthew-button-background);
-  color: var(--matthew-button-color);
+  border: 1px solid var(--matthew-ui-button-border-color, var(--matthew-button-border));
+  // 公开变量只读取、不在按钮自身填默认值，祖先作用域的覆盖才能继承进来。
+  border-radius: var(--matthew-ui-button-radius, var(--matthew-ui-radius-md));
+  background: var(--matthew-ui-button-background, var(--matthew-button-background));
+  color: var(--matthew-ui-button-color, var(--matthew-button-color));
   font: inherit;
   font-weight: 600;
   line-height: 1;
@@ -32,11 +34,12 @@
   @include mixins.focus-ring;
 
   &:not(:disabled):not([aria-disabled='true']):hover {
-    background: var(--matthew-button-background-hover);
+    // 状态字段独立覆盖：只改 background 时仍使用 variant 的默认 hover/active。
+    background: var(--matthew-ui-button-background-hover, var(--matthew-button-background-hover));
   }
 
   &:not(:disabled):not([aria-disabled='true']):active {
-    background: var(--matthew-button-background-active);
+    background: var(--matthew-ui-button-background-active, var(--matthew-button-background-active));
     transform: translateY(1px);
   }
 
@@ -72,21 +75,25 @@
   }
 
   &--sm {
-    min-height: 2rem;
-    padding: 0.375rem 0.75rem;
-    font-size: 0.8125rem;
+    // 组件覆盖优先，否则按 size 读取全局尺度；padding 保留原默认档位，不联动派生。
+    min-height: var(--matthew-ui-button-min-height, var(--matthew-ui-control-height-sm));
+    padding-block: var(--matthew-ui-button-padding-block, 0.375rem);
+    padding-inline: var(--matthew-ui-button-padding-inline, 0.75rem);
+    font-size: var(--matthew-ui-button-font-size, var(--matthew-ui-font-size-sm));
   }
 
   &--md {
-    min-height: 2.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    min-height: var(--matthew-ui-button-min-height, var(--matthew-ui-control-height-md));
+    padding-block: var(--matthew-ui-button-padding-block, 0.5rem);
+    padding-inline: var(--matthew-ui-button-padding-inline, 1rem);
+    font-size: var(--matthew-ui-button-font-size, var(--matthew-ui-font-size-md));
   }
 
   &--lg {
-    min-height: 3rem;
-    padding: 0.625rem 1.25rem;
-    font-size: 1rem;
+    min-height: var(--matthew-ui-button-min-height, var(--matthew-ui-control-height-lg));
+    padding-block: var(--matthew-ui-button-padding-block, 0.625rem);
+    padding-inline: var(--matthew-ui-button-padding-inline, 1.25rem);
+    font-size: var(--matthew-ui-button-font-size, var(--matthew-ui-font-size-lg));
   }
 }
 

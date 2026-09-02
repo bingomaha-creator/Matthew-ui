@@ -20,3 +20,20 @@ export type {
   AutoCompleteOption,
   AutoCompleteProps,
 } from './components/AutoComplete'
+
+export {
+  createTokens,
+  darkTheme,
+  lightTheme,
+  ThemeProvider,
+  tokensToCssVars,
+} from './theme'
+export type {
+  CssVariableMap,
+  CssVariableName,
+  HexColor,
+  MatthewSeedToken,
+  MatthewThemeConfig,
+  MatthewThemeTokens,
+  ThemeProviderProps,
+} from './theme'

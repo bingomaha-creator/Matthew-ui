@@ -1,6 +1,6 @@
 {
   "name": "matthew-ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A typed React UI component library with Button, Menu, and AutoComplete.",
   "keywords": [
     "react",
@@ -36,6 +36,30 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./button": {
+      "types": "./dist/button/index.d.ts",
+      "import": "./dist/button/index.js",
+      "require": "./dist/button/index.cjs"
+    },
+    "./button/style.css": "./dist/button/style.css",
+    "./menu": {
+      "types": "./dist/menu/index.d.ts",
+      "import": "./dist/menu/index.js",
+      "require": "./dist/menu/index.cjs"
+    },
+    "./menu/style.css": "./dist/menu/style.css",
+    "./auto-complete": {
+      "types": "./dist/auto-complete/index.d.ts",
+      "import": "./dist/auto-complete/index.js",
+      "require": "./dist/auto-complete/index.cjs"
+    },
+    "./auto-complete/style.css": "./dist/auto-complete/style.css",
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "import": "./dist/theme/index.js",
+      "require": "./dist/theme/index.cjs"
+    },
+    "./tokens.css": "./dist/tokens.css",
     "./styles.css": "./dist/styles.css"
   },
   "sideEffects": [
@@ -45,7 +69,7 @@
     "dev": "storybook dev -p 6006 --no-open",
     "storybook": "storybook dev -p 6006 --no-open",
     "build": "vite build && npm run build:types && npm run build:styles",
-    "build:styles": "sass src/styles/index.scss dist/styles.css --style=compressed --source-map --embed-sources",
+    "build:styles": "node scripts/build-styles.mjs",
     "build:types": "rollup --config rollup.dts.config.mjs",
     "build-storybook": "storybook build",
     "typecheck": "tsc -b",
@@ -54,7 +78,8 @@
     "test:run": "vitest run --project=unit",
     "test:stories": "vitest run --project=storybook",
     "test:all": "npm run test:run && npm run test:stories",
-    "verify:package": "npm run build && node scripts/verify-package.mjs",
+    "test:package-checks": "npm run build && node --test scripts/package-verification/*.test.mjs",
+    "verify:package": "npm run test:package-checks && node scripts/verify-package.mjs",
     "quality:check": "npm run typecheck && npm run lint && npm run test:all && npm run build-storybook && npm run verify:package",
     "release:check": "node scripts/check-release.mjs && npm run quality:check",
     "release:dry-run": "npm publish --dry-run --access public",

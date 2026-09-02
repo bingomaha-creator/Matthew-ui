@@ -10,7 +10,10 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-docs
+# 学习、面试和内部设计资料保持本地；仅提交工程协作配置。
+docs/*
+!docs/agents/
+!docs/agents/**
 CONTEXT.md
 *.local
 

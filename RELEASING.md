@@ -12,7 +12,7 @@
 - GitHub Pages, `github-pages`, and the protected `npm-release` environment are
   configured. The npm Trusted Publisher is configured for future releases.
 
-The first normal OIDC release will be the first version after `0.1.0`.
+The first normal OIDC release is planned as `0.2.0`.
 
 ## Security model
 
@@ -32,8 +32,7 @@ stay logged in to npm locally for normal releases.
 ## Prepare a stable release
 
 The repository currently accepts stable `x.y.z` versions only. The following
-example releases `0.1.1`; replace it with the exact version chosen for the next
-release.
+steps prepare and release `0.2.0`.
 
 1. Start from a clean and current `main`, then run the normal quality gate:
 
@@ -48,7 +47,7 @@ release.
    implicitly:
 
    ```bash
-   npm version 0.1.1 --no-git-tag-version
+   npm version 0.2.0 --no-git-tag-version
    git diff -- package.json package-lock.json
    ```
 
@@ -56,7 +55,7 @@ release.
 
    ```bash
    git add package.json package-lock.json
-   git commit -m "chore: release v0.1.1"
+   git commit -m "chore: release v0.2.0"
    git push origin main
    ```
 
@@ -75,8 +74,8 @@ release.
    differ. After confirming they match, create the annotated local tag:
 
    ```bash
-   git tag -a v0.1.1 -m "Release v0.1.1"
-   git rev-parse v0.1.1^{commit}
+   git tag -a v0.2.0 -m "Release v0.2.0"
+   git rev-parse v0.2.0^{commit}
    ```
 
    The tag commit must match the two values above. Do not push the tag yet.
@@ -84,7 +83,7 @@ release.
 6. Type the literal package confirmation and run both release gates:
 
    ```bash
-   export MATTHEW_UI_RELEASE_CONFIRMATION=matthew-ui@0.1.1
+   export MATTHEW_UI_RELEASE_CONFIRMATION=matthew-ui@0.2.0
    npm run release:check
    npm run release:dry-run
    unset MATTHEW_UI_RELEASE_CONFIRMATION
@@ -97,10 +96,10 @@ release.
 7. Push only the verified tag:
 
    ```bash
-   git push origin refs/tags/v0.1.1
+   git push origin refs/tags/v0.2.0
    ```
 
-8. In GitHub Releases, create a release from the existing `v0.1.1` tag. It must
+8. In GitHub Releases, create a release from the existing `v0.2.0` tag. It must
    be published, non-draft, and non-prerelease.
 
 9. The `Publish package` workflow will wait for the `npm-release` environment.
@@ -123,10 +122,10 @@ Wait for the `Publish package` workflow to finish successfully, then verify the
 registry independently:
 
 ```bash
-npm view matthew-ui@0.1.1 version gitHead dist.integrity dist.tarball --json
+npm view matthew-ui@0.2.0 version gitHead dist.integrity dist.tarball --json
 npm view matthew-ui dist-tags.latest
-npm pack matthew-ui@0.1.1 --dry-run --json
-git rev-parse v0.1.1^{commit}
+npm pack matthew-ui@0.2.0 --dry-run --json
+git rev-parse v0.2.0^{commit}
 ```
 
 Confirm that:
@@ -144,7 +143,7 @@ Only after these checks pass may development advance `main` again.
 If the workflow fails, first query the registry:
 
 ```bash
-npm view matthew-ui@0.1.1 version
+npm view matthew-ui@0.2.0 version
 ```
 
 - If the version does not exist and the failure is an external OIDC/environment
@@ -153,7 +152,7 @@ npm view matthew-ui@0.1.1 version
 - If the version already exists, do not rerun `npm publish`. Reconcile the npm
   metadata and workflow result first.
 - If an unpushed local tag exists and a fix creates a new commit, delete only
-  that local tag with `git tag -d v0.1.1`, repeat the synchronization checks,
+  that local tag with `git tag -d v0.2.0`, repeat the synchronization checks,
   and create it again. Never force-push it.
 - If the tag or Release is already public and `origin/main` has advanced, do
   not rerun the old workflow, reset `main`, or move the public tag. Prepare a
