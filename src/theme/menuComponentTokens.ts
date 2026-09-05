@@ -1,4 +1,5 @@
-import { toRem } from './tokens'
+import { componentTokensToCssVars } from './componentTokenUtils'
+import type { ComponentTokenFieldMap } from './componentTokenUtils'
 import type { CssVariableMap } from './tokens'
 
 /** 通过 MatthewThemeConfig.components.Menu 使用，不新增包级类型或运行时导出。 */
@@ -37,34 +38,14 @@ const MENU_FIELDS = {
   itemPaddingInline: { suffix: 'item-padding-inline', kind: 'nonnegative' },
   popupBackground: { suffix: 'popup-background', kind: 'string' },
   popupShadow: { suffix: 'popup-shadow', kind: 'string' },
-} as const satisfies Record<keyof MenuComponentTokens, {
-  suffix: string
-  kind: 'string' | 'positive' | 'nonnegative'
-}>
+} as const satisfies ComponentTokenFieldMap<MenuComponentTokens>
 
 /** 内部 Adapter：只处理白名单字段；CSS 决定默认映射与选中/hover的使用时机。 */
 export function menuTokensToCssVars(config: MenuComponentTokens = {}): CssVariableMap {
-  const variables: CssVariableMap = {}
-  for (const key of Object.keys(MENU_FIELDS) as Array<keyof MenuComponentTokens>) {
-    const value: unknown = config[key]
-    if (value === undefined) continue
-    const { suffix, kind } = MENU_FIELDS[key]
-    const name = 'components.Menu.' + key
-    const cssName = `--matthew-ui-menu-${suffix}` as const
-    if (kind === 'string') {
-      if (typeof value !== 'string') throw new TypeError(name + ' must be a CSS string')
-      variables[cssName] = value
-    } else {
-      if (typeof value !== 'number') throw new TypeError(name + ' must be a number')
-      const validRange = kind === 'positive' ? value > 0 : value >= 0
-      if (!Number.isFinite(value) || !validRange) {
-        throw new RangeError(name + (kind === 'positive'
-          ? ' must be finite and greater than 0'
-          : ' must be finite and greater than or equal to 0'))
-      }
-      // 与 Seed/Button 共用设计单位和精度约定，不受当前页面根字号影响。
-      variables[cssName] = toRem(value)
-    }
-  }
-  return variables
+  return componentTokensToCssVars({
+    componentName: 'Menu',
+    cssPrefix: 'menu',
+    fields: MENU_FIELDS,
+    config,
+  })
 }

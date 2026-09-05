@@ -23,66 +23,51 @@ const ThemeConfigContext = createContext<MatthewThemeConfig | undefined>(
   undefined,
 )
 
+/**
+ * 父子主题合并的统一规则：父层字段 + 当前层非 undefined 字段。
+ * 显式 undefined 表示省略并继承父级；null 等错误值保留，交给运行时校验。
+ * 只按字段合并，不能用整个子层对象替换父层配置。
+ */
+function mergeDefinedFields<Fields extends object>(
+  parentFields: Fields | undefined,
+  currentFields: Fields | undefined,
+): Fields {
+  return {
+    ...parentFields,
+    ...Object.fromEntries(
+      Object.entries(currentFields ?? {}).filter(
+        ([, value]) => value !== undefined,
+      ),
+    ),
+  } as Fields
+}
+
 function mergeThemeConfig(
   parentTheme: MatthewThemeConfig | undefined,
   theme: MatthewThemeConfig | undefined,
 ): MatthewThemeConfig {
   return {
     components: {
-      // AutoComplete也按字段独立合并：子级只改一种组件不能丢失其他配置。
-      AutoComplete: {
-        ...parentTheme?.components?.AutoComplete,
-        ...Object.fromEntries(
-          Object.entries(theme?.components?.AutoComplete ?? {}).filter(
-            ([, value]) => value !== undefined,
-          ),
-        ),
-      },
-      Thinking: {
-        ...parentTheme?.components?.Thinking,
-        ...Object.fromEntries(
-          Object.entries(theme?.components?.Thinking ?? {}).filter(
-            ([, value]) => value !== undefined,
-          ),
-        ),
-      },
-      // 每个组件分别合并，不能用整个子 components 对象替换父级配置。
-      Menu: {
-        ...parentTheme?.components?.Menu,
-        ...Object.fromEntries(
-          Object.entries(theme?.components?.Menu ?? {}).filter(
-            ([, value]) => value !== undefined,
-          ),
-        ),
-      },
-      Button: {
-        ...parentTheme?.components?.Button,
-        // 组件字段的 undefined 表示继承，不能通过普通 spread 把父值擦掉。
-        ...Object.fromEntries(
-          Object.entries(theme?.components?.Button ?? {}).filter(
-            ([, value]) => value !== undefined,
-          ),
-        ),
-      },
-    },
-    seed: {
-      ...parentTheme?.seed,
-      // 与组件Token一致：显式undefined表示未提供，不能擦除父级Seed。
-      ...Object.fromEntries(
-        Object.entries(theme?.seed ?? {}).filter(
-          ([, value]) => value !== undefined,
-        ),
+      // 每个组件分别合并：子级只改一种组件不能丢失其他组件配置。
+      AutoComplete: mergeDefinedFields(
+        parentTheme?.components?.AutoComplete,
+        theme?.components?.AutoComplete,
+      ),
+      Thinking: mergeDefinedFields(
+        parentTheme?.components?.Thinking,
+        theme?.components?.Thinking,
+      ),
+      Menu: mergeDefinedFields(
+        parentTheme?.components?.Menu,
+        theme?.components?.Menu,
+      ),
+      Button: mergeDefinedFields(
+        parentTheme?.components?.Button,
+        theme?.components?.Button,
       ),
     },
-    tokens: {
-      ...parentTheme?.tokens,
-      // 最终Token也按字段继承；null等错误值仍保留并交给运行时校验。
-      ...Object.fromEntries(
-        Object.entries(theme?.tokens ?? {}).filter(
-          ([, value]) => value !== undefined,
-        ),
-      ),
-    },
+    seed: mergeDefinedFields(parentTheme?.seed, theme?.seed),
+    tokens: mergeDefinedFields(parentTheme?.tokens, theme?.tokens),
   }
 }
 

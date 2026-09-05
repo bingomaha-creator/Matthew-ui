@@ -1,4 +1,5 @@
-import { toRem } from './tokens'
+import { componentTokensToCssVars } from './componentTokenUtils'
+import type { ComponentTokenFieldMap } from './componentTokenUtils'
 import type { CssVariableMap } from './tokens'
 
 /** 通过MatthewThemeConfig.components.AutoComplete使用；不新增包级独立导出。 */
@@ -59,34 +60,14 @@ const AUTO_COMPLETE_FIELDS = {
   optionPaddingInline: { suffix: 'option-padding-inline', kind: 'nonnegative' },
   popupBackground: { suffix: 'popup-background', kind: 'string' },
   popupShadow: { suffix: 'popup-shadow', kind: 'string' },
-} as const satisfies Record<keyof AutoCompleteComponentTokens, {
-  suffix: string
-  kind: 'string' | 'positive' | 'nonnegative'
-}>
+} as const satisfies ComponentTokenFieldMap<AutoCompleteComponentTokens>
 
 /** 内部Adapter：只生成显式变量；6B才由SCSS决定各状态的消费与默认回退。 */
 export function autoCompleteTokensToCssVars(config: AutoCompleteComponentTokens = {}): CssVariableMap {
-  const variables: CssVariableMap = {}
-  for (const key of Object.keys(AUTO_COMPLETE_FIELDS) as Array<keyof AutoCompleteComponentTokens>) {
-    const value: unknown = config[key]
-    if (value === undefined) continue
-    const { suffix, kind } = AUTO_COMPLETE_FIELDS[key]
-    const name = 'components.AutoComplete.' + key
-    const cssName = `--matthew-ui-auto-complete-${suffix}` as const
-    if (kind === 'string') {
-      if (typeof value !== 'string') throw new TypeError(name + ' must be a CSS string')
-      variables[cssName] = value
-    } else {
-      if (typeof value !== 'number') throw new TypeError(name + ' must be a number')
-      const validRange = kind === 'positive' ? value > 0 : value >= 0
-      if (!Number.isFinite(value) || !validRange) {
-        throw new RangeError(name + (kind === 'positive'
-          ? ' must be finite and greater than 0'
-          : ' must be finite and greater than or equal to 0'))
-      }
-      // 复用设计px→rem的精度规则，不读取当前页面字号。
-      variables[cssName] = toRem(value)
-    }
-  }
-  return variables
+  return componentTokensToCssVars({
+    componentName: 'AutoComplete',
+    cssPrefix: 'auto-complete',
+    fields: AUTO_COMPLETE_FIELDS,
+    config,
+  })
 }

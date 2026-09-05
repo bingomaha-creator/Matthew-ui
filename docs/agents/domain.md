@@ -6,17 +6,22 @@ Matthew UI 是 single-context React 组件库，领域资料按以下层级使�
 
 1. `README.md`：公开安装、API、样式入口、主题和质量合同。
 2. `RELEASING.md`：发布边界、安全模型和稳定版本流程。
-3. 相关源码、测试和 `docs/agents/`：当前实现及工程协作规则。
-4. 若本地存在 `CONTEXT.md`，再读取当前进度、测试边界和学习约定。
-5. 若本地存在 `docs/architecture/`、`docs/learning/reference/` 或 `docs/adr/`，
+3. 与当前任务相关的 `docs/spec/`：已确认的实现范围与验收依据。
+4. 相关源码、测试和 `docs/agents/`：当前实现及工程协作规则。
+5. 若本地存在 `CONTEXT.md`，再读取当前进度、测试边界和学习约定。
+6. 若本地存在 `docs/architecture/`、`docs/learning/reference/` 或 `docs/adr/`，
    按任务读取相关提案、行为契约或长期决策，不要求全部读取。
 
-`CONTEXT.md` 与除 `docs/agents/` 外的内部资料默认不进入Git。干净clone中缺少它们是
-正常情况，不得把其缺失当成阻塞；应以仓库内公开文档、源码和测试继续工作。
+`CONTEXT.md` 与除 `docs/agents/`、`docs/spec/` 外的内部资料默认不进入Git。
+干净clone中缺少这些本地资料是正常情况，不得把其缺失当成阻塞；
+应以仓库内公开文档、spec、源码和测试继续工作。
 
 ## 文档职责
 
 - `README.md` 与 `RELEASING.md` 是干净clone也必须可用的维护合同。
+- `docs/spec/` 记录已确认的目标、非目标、不变量和验收标准，跟随 Git。
+- `docs/handoff/` 只记录执行所需的当前分支、进度、阻塞与验证结果；
+  如已有 spec，handoff 应引用 spec，不复制设计正文。
 - 本地 `CONTEXT.md` 描述“项目现在是什么状态”，可以随实现进度更新。
 - 本地 `docs/architecture/` 描述“考虑过什么以及为什么选择当前方向”，现有资料继续保留。
 - `docs/adr/` 描述“最终决定了什么”，保持简短稳定；决策真正需要冻结时再创建，不批量补历史文件。

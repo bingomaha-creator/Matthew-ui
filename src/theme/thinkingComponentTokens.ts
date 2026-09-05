@@ -1,4 +1,5 @@
-import { toRem } from './tokens'
+import { componentTokensToCssVars } from './componentTokenUtils'
+import type { ComponentTokenFieldMap } from './componentTokenUtils'
 import type { CssVariableMap } from './tokens'
 
 /** 通过MatthewThemeConfig.components.Thinking使用；不新增包级独立导出。 */
@@ -38,34 +39,14 @@ const THINKING_FIELDS = {
   errorColor: { suffix: 'error-color', kind: 'string' },
   borderRadius: { suffix: 'radius', kind: 'nonnegative' },
   headerMinHeight: { suffix: 'header-min-height', kind: 'positive' },
-} as const satisfies Record<keyof ThinkingComponentTokens, {
-  suffix: string
-  kind: 'string' | 'positive' | 'nonnegative'
-}>
+} as const satisfies ComponentTokenFieldMap<ThinkingComponentTokens>
 
 /** 内部Adapter：只生成显式变量；默认回退由SCSS在消费位置读取全局Token。 */
 export function thinkingTokensToCssVars(config: ThinkingComponentTokens = {}): CssVariableMap {
-  const variables: CssVariableMap = {}
-  for (const key of Object.keys(THINKING_FIELDS) as Array<keyof ThinkingComponentTokens>) {
-    const value: unknown = config[key]
-    if (value === undefined) continue
-    const { suffix, kind } = THINKING_FIELDS[key]
-    const name = 'components.Thinking.' + key
-    const cssName = `--matthew-ui-thinking-${suffix}` as const
-    if (kind === 'string') {
-      if (typeof value !== 'string') throw new TypeError(name + ' must be a CSS string')
-      variables[cssName] = value
-    } else {
-      if (typeof value !== 'number') throw new TypeError(name + ' must be a number')
-      const validRange = kind === 'positive' ? value > 0 : value >= 0
-      if (!Number.isFinite(value) || !validRange) {
-        throw new RangeError(name + (kind === 'positive'
-          ? ' must be finite and greater than 0'
-          : ' must be finite and greater than or equal to 0'))
-      }
-      // 复用设计px→rem的精度规则，不读取当前页面字号。
-      variables[cssName] = toRem(value)
-    }
-  }
-  return variables
+  return componentTokensToCssVars({
+    componentName: 'Thinking',
+    cssPrefix: 'thinking',
+    fields: THINKING_FIELDS,
+    config,
+  })
 }

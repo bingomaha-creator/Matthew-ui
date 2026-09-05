@@ -262,4 +262,15 @@ describe('ThemeProvider Button configuration', () => {
     }
     expect(() => ssrStyle(uncheckedTheme({ color: 'not-a-color' }))).not.toThrow()
   })
+
+  test('formats Button field errors with the component name and stable text', () => {
+    expect(() => ssrStyle(uncheckedTheme({ background: 5 })))
+      .toThrow('components.Button.background must be a CSS string')
+    expect(() => ssrStyle(uncheckedTheme({ borderRadius: '8px' })))
+      .toThrow('components.Button.borderRadius must be a number')
+    expect(() => ssrStyle(uncheckedTheme({ minHeight: 0 })))
+      .toThrow('components.Button.minHeight must be finite and greater than 0')
+    expect(() => ssrStyle(uncheckedTheme({ paddingInline: -1 })))
+      .toThrow('components.Button.paddingInline must be finite and greater than or equal to 0')
+  })
 })

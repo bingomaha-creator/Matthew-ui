@@ -257,4 +257,15 @@ describe('ThemeProvider Menu configuration', () => {
     }
     expect(() => ssrStyle(uncheckedTheme({ itemColor: 'not-a-color', popupShadow: 'not-a-shadow' }))).not.toThrow()
   })
+
+  test('formats Menu field errors with the component name and stable text', () => {
+    expect(() => ssrStyle(uncheckedTheme({ itemColor: 5 })))
+      .toThrow('components.Menu.itemColor must be a CSS string')
+    expect(() => ssrStyle(uncheckedTheme({ itemFontSize: '16px' })))
+      .toThrow('components.Menu.itemFontSize must be a number')
+    expect(() => ssrStyle(uncheckedTheme({ itemMinHeight: 0 })))
+      .toThrow('components.Menu.itemMinHeight must be finite and greater than 0')
+    expect(() => ssrStyle(uncheckedTheme({ itemBorderRadius: -1 })))
+      .toThrow('components.Menu.itemBorderRadius must be finite and greater than or equal to 0')
+  })
 })
