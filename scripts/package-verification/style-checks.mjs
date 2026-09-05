@@ -7,6 +7,7 @@ import { chromium } from 'playwright'
 export { checkMenuBrowserStyles } from './menu-style-checks.mjs'
 export { checkAutoCompleteBrowserStyles } from './auto-complete-style-checks.mjs'
 export { checkThinkingBrowserStyles } from './thinking-style-checks.mjs'
+export { checkToolCallBrowserStyles } from './tool-call-style-checks.mjs'
 
 /**
  * 样式验收使用真实 Chromium，HTML 来自消费端安装的组件。
@@ -145,7 +146,7 @@ export async function checkStyles({
     assert.doesNotMatch(css, /@import/)
     assert.doesNotMatch(
       css,
-      /\.matthew-(?:button|menu|auto-complete|thinking)/,
+      /\.matthew-(?:button|menu|auto-complete|thinking|tool-call)/,
     )
     assert.match(css, /sourceMappingURL=tokens\.css\.map/)
   })
@@ -169,7 +170,12 @@ export async function checkStyles({
       {
         path: 'dist/thinking/style.css',
         marker: '.matthew-thinking',
-        forbiddenMarkers: ['.matthew-button', '.matthew-menu', '.matthew-auto-complete'],
+        forbiddenMarkers: ['.matthew-button', '.matthew-menu', '.matthew-auto-complete', '.matthew-tool-call'],
+      },
+      {
+        path: 'dist/tool-call/style.css',
+        marker: '.matthew-tool-call',
+        forbiddenMarkers: ['.matthew-button', '.matthew-menu', '.matthew-auto-complete', '.matthew-thinking'],
       },
     ]
 
@@ -211,6 +217,7 @@ export async function checkStyles({
       '.matthew-menu',
       '.matthew-auto-complete',
       '.matthew-thinking',
+      '.matthew-tool-call',
     ]) {
       assert.ok(css.includes(selector), `dist/styles.css is missing ${selector}`)
     }

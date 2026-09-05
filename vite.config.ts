@@ -23,6 +23,10 @@ export default defineConfig({
           import.meta.dirname,
           'src/components/Thinking/index.ts',
         ),
+        'tool-call': resolve(
+          import.meta.dirname,
+          'src/components/ToolCall/index.ts',
+        ),
         theme: resolve(import.meta.dirname, 'src/theme/index.ts'),
       },
       formats: ['es', 'cjs'],

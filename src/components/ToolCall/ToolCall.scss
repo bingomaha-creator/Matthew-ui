@@ -1,0 +1,174 @@
+@use '../../styles/mixins' as mixins;
+
+// 只有 running 的缺口圆环持续旋转（TC-V03）；keyframes挂在matthew-tool-call命名空间下。
+@keyframes matthew-tool-call-ring-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.matthew-tool-call {
+  // 根节点透明：无完整边框、背景和阴影，比 Thinking 更小更浅（TC-V01）。
+  color: var(--matthew-ui-color-text);
+  font: inherit;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--matthew-ui-tool-call-header-min-height, var(--matthew-ui-control-height-sm));
+    padding: 0.3125rem 0.5rem;
+    border: none;
+    border-radius: var(--matthew-ui-tool-call-radius, var(--matthew-ui-radius-md));
+    background: transparent;
+    color: var(--matthew-ui-tool-call-name-color, var(--matthew-ui-color-text));
+    font: inherit;
+    font-size: var(--matthew-ui-font-size-sm);
+    text-align: left;
+  }
+
+  // 有详情时标题行是原生 button：hover、手型光标与 focus ring 只属于它；
+  // 无详情的状态行是同一 class 的 div，不出现虚假交互提示。
+  button.matthew-tool-call__header {
+    cursor: pointer;
+
+    @include mixins.focus-ring;
+
+    &:hover {
+      background: var(--matthew-ui-tool-call-header-hover-background, var(--matthew-ui-color-surface-hover));
+    }
+  }
+
+  &__status {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 0.625rem;
+    height: 0.625rem;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // pending：空心圆，明确不用浅色实心圆（TC-V02）。
+  &__hollow {
+    box-sizing: border-box;
+    width: 0.625rem;
+    height: 0.625rem;
+    border: 1.5px solid var(--matthew-ui-tool-call-pending-color, var(--matthew-ui-color-text-muted));
+    border-radius: 50%;
+  }
+
+  // running：缺口圆环，一侧透明形成缺口，匀速轻量旋转。
+  &__ring {
+    box-sizing: border-box;
+    width: 0.625rem;
+    height: 0.625rem;
+    border: 1.5px solid var(--matthew-ui-tool-call-running-color, var(--matthew-ui-color-primary));
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: matthew-tool-call-ring-spin 0.9s linear infinite;
+  }
+
+  &__check {
+    color: var(--matthew-ui-tool-call-completed-color, var(--matthew-ui-color-primary-active));
+  }
+
+  &__bang {
+    color: var(--matthew-ui-tool-call-error-color, var(--matthew-ui-color-danger));
+  }
+
+  &__square {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--matthew-ui-tool-call-stopped-color, var(--matthew-ui-color-text-muted));
+  }
+
+  &__name {
+    overflow: hidden;
+    flex: 1;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__summary {
+    overflow: hidden;
+    flex: 1;
+    // 摘要默认 12px、弱化颜色，与名称同一行；细颗粒值不开放为 Token（TC-V01）。
+    font-size: 0.75rem;
+    color: var(--matthew-ui-tool-call-summary-color, var(--matthew-ui-color-text-muted));
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__arrow {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-top: 1.5px solid currentColor;
+    border-right: 1.5px solid currentColor;
+    // 默认指向右方；展开后旋转到下方（45deg + 90deg）。
+    transform: rotate(45deg);
+    transition: transform var(--matthew-ui-duration-fast) ease;
+  }
+
+  &__header[aria-expanded='true'] &__arrow {
+    transform: rotate(135deg);
+  }
+
+  // 当前状态文案以视觉隐藏文本加入可访问名称（TC-B05）。
+  &__sr-status {
+    position: absolute;
+    overflow: hidden;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    white-space: nowrap;
+  }
+
+  &__detail {
+    box-sizing: border-box;
+    // 详情通过缩进与一条 1px 左侧细分隔线建立层级；不形成封闭边框或卡片（TC-V01）。
+    margin-left: 0.875rem;
+    padding: 0 0.5rem 0.375rem 0.75rem;
+    border-left: 1px solid var(--matthew-ui-tool-call-border-color, var(--matthew-ui-color-border));
+    color: var(--matthew-ui-tool-call-detail-color, var(--matthew-ui-color-text-muted));
+    font-size: var(--matthew-ui-font-size-sm);
+    // 内容自然换行撑高；不设最大高度、内部滚动或文本截断。
+    overflow-wrap: anywhere;
+  }
+}
+
+// reduced motion下停止圆环旋转与箭头过渡，保留静态缺口（TC-V03）。
+@media (prefers-reduced-motion: reduce) {
+  .matthew-tool-call__ring {
+    animation: none;
+  }
+
+  .matthew-tool-call__arrow {
+    transition: none;
+  }
+}
+
+// 320px 窄宽下优先保留名称、状态与展开能力；摘要视觉隐藏但保留在
+// 可访问名称中，不用 display:none 意外丢失辅助技术文本（TC-V06）。
+@media (max-width: 320px) {
+  .matthew-tool-call__summary {
+    position: absolute;
+    overflow: hidden;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+  }
+}

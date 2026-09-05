@@ -7,6 +7,7 @@ export default {
     menu: 'src/components/Menu/index.ts',
     'auto-complete': 'src/components/AutoComplete/index.ts',
     thinking: 'src/components/Thinking/index.ts',
+    'tool-call': 'src/components/ToolCall/index.ts',
     theme: 'src/theme/index.ts',
   },
   output: {

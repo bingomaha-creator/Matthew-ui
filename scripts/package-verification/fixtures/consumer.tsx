@@ -9,11 +9,13 @@ import {
   Menu,
   ThemeProvider,
   Thinking,
+  ToolCall,
   tokensToCssVars,
 } from 'matthew-ui'
 import { Button as SubpathButton } from 'matthew-ui/button'
 import { AutoComplete as SubpathAutoComplete } from 'matthew-ui/auto-complete'
 import { Thinking as SubpathThinking } from 'matthew-ui/thinking'
+import { ToolCall as SubpathToolCall } from 'matthew-ui/tool-call'
 import {
   darkTheme as subpathDarkTheme,
   ThemeProvider as SubpathThemeProvider,
@@ -38,9 +40,12 @@ import type {
   ThemeProviderProps,
   ThinkingProps,
   ThinkingStatus,
+  ToolCallProps,
+  ToolCallStatus,
 } from 'matthew-ui'
 import type { ButtonProps as SubpathButtonProps } from 'matthew-ui/button'
 import type { ThinkingProps as SubpathThinkingProps } from 'matthew-ui/thinking'
+import type { ToolCallProps as SubpathToolCallProps } from 'matthew-ui/tool-call'
 import type {
   AutoCompleteProps as SubpathAutoCompleteProps,
 } from 'matthew-ui/auto-complete'
@@ -68,6 +73,8 @@ type PublicTypeContract = [
   ThemeProviderProps,
   ThinkingProps,
   ThinkingStatus,
+  ToolCallProps,
+  ToolCallStatus,
   MatthewSeedToken,
   MatthewThemeConfig,
   MatthewThemeTokens,
@@ -76,6 +83,7 @@ type PublicTypeContract = [
   SubpathButtonProps,
   SubpathAutoCompleteProps<PlayerOption>,
   SubpathThinkingProps,
+  SubpathToolCallProps,
   SubpathThemeConfig,
 ]
 
@@ -152,6 +160,43 @@ const invalidThinkingRadius: MatthewThemeConfig = { components: { Thinking: { bo
 // @ts-expect-error Thinking 标题颜色不能退化成数字。
 const invalidThinkingColor: SubpathThemeConfig = { components: { Thinking: { titleColor: 5 } } }
 void [invalidThinkingRadius, invalidThinkingColor]
+
+const toolCallLabels: Record<ToolCallStatus, string> = {
+  pending: '排队中', running: '执行中', completed: '已完成',
+  error: '失败', stopped: '已中止',
+}
+const controlledToolCall = (
+  <ToolCall
+    ref={divRef}
+    name="读取项目文件"
+    status="running"
+    summary="正在执行…"
+    statusLabels={toolCallLabels}
+    onOpenChange={(nextOpen) => void nextOpen}
+  >
+    步骤
+  </ToolCall>
+)
+const subpathToolCall = (
+  <SubpathToolCall name="子路径工具" status="stopped" />
+)
+const toolCallTheme: MatthewThemeConfig = { components: { ToolCall: {
+  nameColor: '#0f172a', summaryColor: 'gray', detailColor: 'gray', borderColor: 'blue',
+  headerHoverBackground: 'white', pendingColor: 'gray', runningColor: 'green',
+  completedColor: 'cyan', errorColor: 'red', stoppedColor: 'gray',
+  borderRadius: 0, headerMinHeight: 32,
+} } }
+void [controlledToolCall, subpathToolCall, toolCallTheme]
+
+// @ts-expect-error ToolCall 圆角不允许字符串尺寸。
+const invalidToolCallRadius: MatthewThemeConfig = { components: { ToolCall: { borderRadius: '8px' } } }
+const invalidToolCallLabels: ToolCallProps = {
+  name: '读取项目文件',
+  status: 'running',
+  // @ts-expect-error ToolCall 状态文案必须是完整五键映射。
+  statusLabels: { running: '执行中' },
+}
+void [invalidToolCallRadius, invalidToolCallLabels]
 
 const autoCompleteSubpathConfig: SubpathThemeConfig = autoCompleteTheme
 const autoCompleteSubpathProvider = <SubpathThemeProvider theme={autoCompleteSubpathConfig}>配置</SubpathThemeProvider>

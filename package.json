@@ -60,6 +60,12 @@
       "require": "./dist/thinking/index.cjs"
     },
     "./thinking/style.css": "./dist/thinking/style.css",
+    "./tool-call": {
+      "types": "./dist/tool-call/index.d.ts",
+      "import": "./dist/tool-call/index.js",
+      "require": "./dist/tool-call/index.cjs"
+    },
+    "./tool-call/style.css": "./dist/tool-call/style.css",
     "./theme": {
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.js",

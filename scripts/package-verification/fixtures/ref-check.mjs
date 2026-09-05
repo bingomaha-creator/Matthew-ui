@@ -41,6 +41,7 @@ const {
   Menu,
   ThemeProvider,
   Thinking,
+  ToolCall,
 } = await import('matthew-ui')
 const { createElement, createRef } = React
 
@@ -48,6 +49,7 @@ const buttonRef = createRef()
 const anchorRef = createRef()
 const inputRef = createRef()
 const thinkingRef = createRef()
+const toolCallRef = createRef()
 const container = document.querySelector('#root')
 const root = createRoot(container)
 
@@ -81,6 +83,12 @@ flushSync(() => {
         'data-ref-target': 'thinking',
         ref: thinkingRef,
       }, '步骤'),
+      createElement(ToolCall, {
+        name: '读取项目文件',
+        status: 'running',
+        'data-ref-target': 'tool-call',
+        ref: toolCallRef,
+      }, '步骤'),
       createElement(
         Menu,
         { 'aria-label': 'Navigation' },
@@ -99,6 +107,12 @@ assert.strictEqual(
   container.querySelector('[data-ref-target="thinking"]'),
 )
 assert.ok(thinkingRef.current.isConnected)
+assert.ok(toolCallRef.current instanceof window.HTMLDivElement)
+assert.strictEqual(
+  toolCallRef.current,
+  container.querySelector('[data-ref-target="tool-call"]'),
+)
+assert.ok(toolCallRef.current.isConnected)
 assert.strictEqual(
   buttonRef.current,
   container.querySelector('[data-ref-target="button"]'),

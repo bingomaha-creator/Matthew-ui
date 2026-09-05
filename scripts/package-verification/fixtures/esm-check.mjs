@@ -10,6 +10,7 @@ const expectedExports = [
   'Menu',
   'ThemeProvider',
   'Thinking',
+  'ToolCall',
   'createTokens',
   'darkTheme',
   'lightTheme',
@@ -20,6 +21,7 @@ const buttonModule = await import('matthew-ui/button')
 const menuModule = await import('matthew-ui/menu')
 const autoCompleteModule = await import('matthew-ui/auto-complete')
 const thinkingModule = await import('matthew-ui/thinking')
+const toolCallModule = await import('matthew-ui/tool-call')
 const themeModule = await import('matthew-ui/theme')
 
 // 在 React 18/19 各自的真实安装环境验证新配置；不依赖浏览器 effect 才输出变量。
@@ -75,6 +77,12 @@ for (const provider of [ui.ThemeProvider, themeModule.ThemeProvider]) {
   assert.throws(() => renderToStaticMarkup(createElement(provider, {
     theme: { components: { Thinking: { runningColor: 8 } } },
   }, 'Invalid Thinking color')), TypeError)
+  assert.throws(() => renderToStaticMarkup(createElement(provider, {
+    theme: { components: { ToolCall: { headerMinHeight: 0 } } },
+  }, 'Invalid ToolCall dimension')), RangeError)
+  assert.throws(() => renderToStaticMarkup(createElement(provider, {
+    theme: { components: { ToolCall: { nameColor: 8 } } },
+  }, 'Invalid ToolCall color')), TypeError)
 }
 
 assert.deepEqual(Object.keys(ui).sort(), expectedExports)
@@ -82,6 +90,7 @@ assert.deepEqual(Object.keys(buttonModule).sort(), ['Button', 'LinkButton'])
 assert.deepEqual(Object.keys(menuModule), ['Menu'])
 assert.deepEqual(Object.keys(autoCompleteModule), ['AutoComplete'])
 assert.deepEqual(Object.keys(thinkingModule), ['Thinking'])
+assert.deepEqual(Object.keys(toolCallModule), ['ToolCall'])
 assert.deepEqual(Object.keys(themeModule).sort(), [
   'ThemeProvider',
   'createTokens',
@@ -95,6 +104,7 @@ for (const cssEntry of [
   'matthew-ui/menu/style.css',
   'matthew-ui/auto-complete/style.css',
   'matthew-ui/thinking/style.css',
+  'matthew-ui/tool-call/style.css',
   'matthew-ui/styles.css',
 ]) {
   assert.match(import.meta.resolve(cssEntry), /\.css$/)

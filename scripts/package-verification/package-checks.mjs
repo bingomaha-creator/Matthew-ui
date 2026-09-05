@@ -41,6 +41,13 @@ const requiredPackageFiles = [
   'dist/thinking/index.js.map',
   'dist/thinking/style.css',
   'dist/thinking/style.css.map',
+  'dist/tool-call/index.cjs',
+  'dist/tool-call/index.cjs.map',
+  'dist/tool-call/index.d.ts',
+  'dist/tool-call/index.js',
+  'dist/tool-call/index.js.map',
+  'dist/tool-call/style.css',
+  'dist/tool-call/style.css.map',
   'dist/theme/index.cjs',
   'dist/theme/index.cjs.map',
   'dist/theme/index.d.ts',
@@ -77,6 +84,9 @@ const expectedPublicExports = [
   'Thinking',
   'ThinkingProps',
   'ThinkingStatus',
+  'ToolCall',
+  'ToolCallProps',
+  'ToolCallStatus',
   'createTokens',
   'darkTheme',
   'lightTheme',
@@ -191,6 +201,8 @@ const assertExports = (manifest) => {
     './thinking',
     './thinking/style.css',
     './tokens.css',
+    './tool-call',
+    './tool-call/style.css',
   ])
   assert.deepEqual(Object.keys(manifest.exports['.']), [
     'types',
@@ -222,6 +234,11 @@ const assertExports = (manifest) => {
     import: './dist/thinking/index.js',
     require: './dist/thinking/index.cjs',
   })
+  assert.deepEqual(manifest.exports['./tool-call'], {
+    types: './dist/tool-call/index.d.ts',
+    import: './dist/tool-call/index.js',
+    require: './dist/tool-call/index.cjs',
+  })
   assert.deepEqual(manifest.exports['./theme'], {
     types: './dist/theme/index.d.ts',
     import: './dist/theme/index.js',
@@ -242,6 +259,10 @@ const assertExports = (manifest) => {
   assert.equal(
     manifest.exports['./thinking/style.css'],
     './dist/thinking/style.css',
+  )
+  assert.equal(
+    manifest.exports['./tool-call/style.css'],
+    './dist/tool-call/style.css',
   )
   assert.equal(manifest.exports['./tokens.css'], './dist/tokens.css')
   assert.equal(manifest.exports['./styles.css'], './dist/styles.css')

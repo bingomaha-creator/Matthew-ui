@@ -27,6 +27,12 @@ export type {
   ThinkingStatus,
 } from './components/Thinking'
 
+export { ToolCall } from './components/ToolCall'
+export type {
+  ToolCallProps,
+  ToolCallStatus,
+} from './components/ToolCall'
+
 export {
   createTokens,
   darkTheme,
