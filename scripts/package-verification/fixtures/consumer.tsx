@@ -8,10 +8,12 @@ import {
   LinkButton,
   Menu,
   ThemeProvider,
+  Thinking,
   tokensToCssVars,
 } from 'matthew-ui'
 import { Button as SubpathButton } from 'matthew-ui/button'
 import { AutoComplete as SubpathAutoComplete } from 'matthew-ui/auto-complete'
+import { Thinking as SubpathThinking } from 'matthew-ui/thinking'
 import {
   darkTheme as subpathDarkTheme,
   ThemeProvider as SubpathThemeProvider,
@@ -34,8 +36,11 @@ import type {
   MenuProps,
   MenuSubMenuProps,
   ThemeProviderProps,
+  ThinkingProps,
+  ThinkingStatus,
 } from 'matthew-ui'
 import type { ButtonProps as SubpathButtonProps } from 'matthew-ui/button'
+import type { ThinkingProps as SubpathThinkingProps } from 'matthew-ui/thinking'
 import type {
   AutoCompleteProps as SubpathAutoCompleteProps,
 } from 'matthew-ui/auto-complete'
@@ -61,6 +66,8 @@ type PublicTypeContract = [
   MenuProps,
   MenuSubMenuProps,
   ThemeProviderProps,
+  ThinkingProps,
+  ThinkingStatus,
   MatthewSeedToken,
   MatthewThemeConfig,
   MatthewThemeTokens,
@@ -68,6 +75,7 @@ type PublicTypeContract = [
   CssVariableName,
   SubpathButtonProps,
   SubpathAutoCompleteProps<PlayerOption>,
+  SubpathThinkingProps,
   SubpathThemeConfig,
 ]
 
@@ -112,6 +120,38 @@ const numericAutoShadow: SubpathThemeConfig = { components: { AutoComplete: { po
 const nullAutoRadius: MatthewThemeConfig = { components: { AutoComplete: { inputBorderRadius: null } } }
 void [configuredAutoCompleteProvider, stringAutoFont, stringAutoPadding, arbitraryAutoStyle,
   numericAutoColor, numericAutoShadow, nullAutoRadius]
+
+const controlledThinking = (
+  <Thinking
+    ref={divRef}
+    title="分析中"
+    status="running"
+    statusLabels={{
+      running: 'Running', completed: 'Completed', stopped: 'Stopped', error: 'Failed',
+    }}
+    defaultOpen={false}
+    onOpenChange={(nextOpen) => void nextOpen}
+  >
+    步骤
+  </Thinking>
+)
+const subpathThinking = (
+  <SubpathThinking title="子路径分析" status="completed" open>
+    步骤
+  </SubpathThinking>
+)
+const thinkingTheme: MatthewThemeConfig = { components: { Thinking: {
+  titleColor: '#0f172a', contentColor: 'gray', borderColor: 'blue',
+  headerHoverBackground: 'white', runningColor: 'green', completedColor: 'cyan',
+  stoppedColor: 'gray', errorColor: 'red', borderRadius: 0, headerMinHeight: 48,
+} } }
+void [controlledThinking, subpathThinking, thinkingTheme]
+
+// @ts-expect-error Thinking 圆角不允许字符串尺寸。
+const invalidThinkingRadius: MatthewThemeConfig = { components: { Thinking: { borderRadius: '8px' } } }
+// @ts-expect-error Thinking 标题颜色不能退化成数字。
+const invalidThinkingColor: SubpathThemeConfig = { components: { Thinking: { titleColor: 5 } } }
+void [invalidThinkingRadius, invalidThinkingColor]
 
 const autoCompleteSubpathConfig: SubpathThemeConfig = autoCompleteTheme
 const autoCompleteSubpathProvider = <SubpathThemeProvider theme={autoCompleteSubpathConfig}>配置</SubpathThemeProvider>

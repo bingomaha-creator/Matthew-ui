@@ -40,12 +40,14 @@ const {
   LinkButton,
   Menu,
   ThemeProvider,
+  Thinking,
 } = await import('matthew-ui')
 const { createElement, createRef } = React
 
 const buttonRef = createRef()
 const anchorRef = createRef()
 const inputRef = createRef()
+const thinkingRef = createRef()
 const container = document.querySelector('#root')
 const root = createRoot(container)
 
@@ -74,6 +76,11 @@ flushSync(() => {
         fetchSuggestions: () => [],
         ref: inputRef,
       }),
+      createElement(Thinking, {
+        title: '分析中',
+        'data-ref-target': 'thinking',
+        ref: thinkingRef,
+      }, '步骤'),
       createElement(
         Menu,
         { 'aria-label': 'Navigation' },
@@ -86,6 +93,12 @@ flushSync(() => {
 assert.ok(buttonRef.current instanceof window.HTMLButtonElement)
 assert.ok(anchorRef.current instanceof window.HTMLAnchorElement)
 assert.ok(inputRef.current instanceof window.HTMLInputElement)
+assert.ok(thinkingRef.current instanceof window.HTMLDivElement)
+assert.strictEqual(
+  thinkingRef.current,
+  container.querySelector('[data-ref-target="thinking"]'),
+)
+assert.ok(thinkingRef.current.isConnected)
 assert.strictEqual(
   buttonRef.current,
   container.querySelector('[data-ref-target="button"]'),

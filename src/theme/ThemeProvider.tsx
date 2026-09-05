@@ -11,6 +11,7 @@ import type { MatthewThemeConfig } from './tokens'
 import { buttonTokensToCssVars } from './componentTokens'
 import { menuTokensToCssVars } from './menuComponentTokens'
 import { autoCompleteTokensToCssVars } from './autoCompleteComponentTokens'
+import { thinkingTokensToCssVars } from './thinkingComponentTokens'
 
 export interface ThemeProviderProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
@@ -33,6 +34,14 @@ function mergeThemeConfig(
         ...parentTheme?.components?.AutoComplete,
         ...Object.fromEntries(
           Object.entries(theme?.components?.AutoComplete ?? {}).filter(
+            ([, value]) => value !== undefined,
+          ),
+        ),
+      },
+      Thinking: {
+        ...parentTheme?.components?.Thinking,
+        ...Object.fromEntries(
+          Object.entries(theme?.components?.Thinking ?? {}).filter(
             ([, value]) => value !== undefined,
           ),
         ),
@@ -93,6 +102,7 @@ export function ThemeProvider({
     ...buttonTokensToCssVars(mergedTheme.components?.Button),
     ...menuTokensToCssVars(mergedTheme.components?.Menu),
     ...autoCompleteTokensToCssVars(mergedTheme.components?.AutoComplete),
+    ...thinkingTokensToCssVars(mergedTheme.components?.Thinking),
   }
 
   // 只覆盖配置实际输出的变量；无配置时不写组件默认值，让 CSS 继承继续工作。

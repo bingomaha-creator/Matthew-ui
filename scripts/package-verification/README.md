@@ -47,7 +47,7 @@ Fixture 是消费端代码，不是本库源码；其中 `matthew-ui` 必须解�
 # 首次安装依赖后准备 Chromium；CI 已包含此步骤
 npx playwright install chromium
 
-# 构建后运行验证器的36条回归测试，不安装 React 双版本消费项目
+# 构建后运行验证器的43条回归测试，不安装 React 双版本消费项目
 npm run test:package-checks
 
 # 包含上述回归测试，再打包并验证 React 18.2/19 真实消费

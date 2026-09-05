@@ -6,6 +6,7 @@ export default {
     button: 'src/components/Button/index.ts',
     menu: 'src/components/Menu/index.ts',
     'auto-complete': 'src/components/AutoComplete/index.ts',
+    thinking: 'src/components/Thinking/index.ts',
     theme: 'src/theme/index.ts',
   },
   output: {

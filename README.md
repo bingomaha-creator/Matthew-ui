@@ -5,7 +5,7 @@
 [![Storybook](https://img.shields.io/badge/Storybook-online-ff4785?logo=storybook&logoColor=white)](https://bingomaha-creator.github.io/Matthew-ui/)
 [![License](https://img.shields.io/npm/l/matthew-ui)](./LICENSE)
 
-Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu 和 AutoComplete。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
+Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu、AutoComplete 和 agent 原生 Thinking 组件。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
 
 - [npm 包：`matthew-ui`](https://www.npmjs.com/package/matthew-ui)
 - [在线 Storybook](https://bingomaha-creator.github.io/Matthew-ui/)
@@ -312,6 +312,54 @@ export function Search() {
 本地运行 `npm run storybook`，在 `Theme / AutoCompleteTokens` 体验尺寸、区域定制、
 嵌套输入例外、亮暗切换/撤销与异步加载。自动化检查不代替实际页面的观感判断。
 
+### Thinking 组件定制
+
+Thinking 可以从包根入口引入，也可以同时按需拆分 JavaScript 和 CSS：
+
+```tsx
+import { Thinking } from 'matthew-ui/thinking'
+import { ThemeProvider } from 'matthew-ui/theme'
+import 'matthew-ui/tokens.css'
+import 'matthew-ui/thinking/style.css'
+
+export function AgentProgress() {
+  return (
+    <ThemeProvider theme={{ components: { Thinking: {
+      runningColor: '#7c3aed',
+      completedColor: '#15803d',
+      borderRadius: 10,
+    } } }}>
+      <Thinking title="正在分析项目" status="running">
+        <p>读取项目结构</p>
+      </Thinking>
+    </ThemeProvider>
+  )
+}
+```
+
+`theme.components.Thinking` 的10个字段均可选：
+
+| 字段 | 类型 | 公开 CSS 变量 |
+| --- | --- | --- |
+| titleColor | string | --matthew-ui-thinking-title-color |
+| contentColor | string | --matthew-ui-thinking-content-color |
+| borderColor | string | --matthew-ui-thinking-border-color |
+| headerHoverBackground | string | --matthew-ui-thinking-header-hover-background |
+| runningColor | string | --matthew-ui-thinking-running-color |
+| completedColor | string | --matthew-ui-thinking-completed-color |
+| stoppedColor | string | --matthew-ui-thinking-stopped-color |
+| errorColor | string | --matthew-ui-thinking-error-color |
+| borderRadius | number ≥ 0 | --matthew-ui-thinking-radius |
+| headerMinHeight | number > 0 | --matthew-ui-thinking-header-min-height |
+
+- 数字是设计 px，以16为基准转换为 rem；类型、有限数与范围校验规则与其他组件 Token 一致。
+- 颜色字段只接受 CSS 字符串，彼此不派生；未提供的字段继续读取当前全局 Token。
+- 父子 Provider 按字段继承；空对象和 `undefined` 不擦除父值，撤销当前层覆盖后恢复父值或 CSS 默认回退。
+- 业务祖先或 Thinking 根节点也可以直接设置上表中的公开变量，按正常 CSS 级联和继承生效。
+
+本地运行 `npm run storybook`，在 `Components / Thinking` 查看默认折叠、
+四种状态、受控用法、亮暗主题、窄宽长标题与 reduced-motion 降级效果。
+
 ## 组件
 
 ### Button 与 LinkButton
@@ -399,6 +447,38 @@ export function PlayerSearch() {
 
 每个建议项至少需要唯一的字符串 `value`。`fetchSuggestions` 可以返回数组或 Promise；`onValueChange` 接收输入字符串，`onOptionSelect` 接收完整建议对象。组件支持 `value/onValueChange` 受控模式或 `defaultValue` 非受控模式，并内置 300ms 查询防抖。
 
+### Thinking
+
+```tsx
+import { Thinking } from 'matthew-ui'
+
+const statusLabels = {
+  running: '运行中',
+  completed: '已完成',
+  stopped: '已中止',
+  error: '失败',
+}
+
+export function AnalysisProgress() {
+  return (
+    <Thinking
+      title="分析项目"
+      status="running"
+      statusLabels={statusLabels}
+    >
+      <p>读取项目结构</p>
+      <p>检查组件入口</p>
+    </Thinking>
+  )
+}
+```
+
+Thinking 默认为 `running` 且处于折叠状态。`status` 支持
+`running | completed | stopped | error`；展开状态可以使用
+`open/onOpenChange` 受控，或使用 `defaultOpen` 非受控。折叠时内容保持挂载。
+`statusLabels` 可选，只向辅助技术表达当前状态；组件不内置语言文案，
+也不使用 `aria-live` 主动播报状态变化。
+
 ## 公开入口
 
 | 入口 | 内容 |
@@ -407,24 +487,27 @@ export function PlayerSearch() {
 | `matthew-ui/button` | Button/LinkButton 及对应类型 |
 | `matthew-ui/menu` | Menu 及对应类型 |
 | `matthew-ui/auto-complete` | AutoComplete 及对应类型 |
+| `matthew-ui/thinking` | Thinking 及对应类型 |
 | `matthew-ui/theme` | ThemeProvider、主题预设、Token API 及对应类型 |
 | `matthew-ui/tokens.css` | 默认亮色 `:root` Token |
 | `matthew-ui/button/style.css` | Button/LinkButton 样式 |
 | `matthew-ui/menu/style.css` | Menu 样式 |
 | `matthew-ui/auto-complete/style.css` | AutoComplete 样式 |
+| `matthew-ui/thinking/style.css` | Thinking 样式 |
 | `matthew-ui/styles.css` | Token 与全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
 
 ## 质量验证
 
-- 227 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
-- 33 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
-- 36 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
+- 258 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
+- 39 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
+- 43 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
 - 真实 `npm pack` tarball 会分别安装到 React 18.2 与 React 19 临时消费端，验证 ESM、CommonJS、类型、CSS、DOM ref、公开入口边界和 Vite Tree Shaking。
 - Chromium 验证无 Provider 的默认 Token 回退，以及按需/全量 CSS 的 Button/LinkButton 定制尺寸、颜色、真实 hover/active 与作用域隔离。
 - Menu还经过真实挂载，验证两种CSS模式的默认/定制尺寸、选中悬停、父标题和浮层；不以SSR静态标记代替子菜单注册与展开。
 - AutoComplete同样从真实安装包挂载，验证两种CSS模式的默认/定制输入、异步加载、候选高亮与回填、禁用/只读及暗色浮层；不以变量输出代替最终样式。
+- Thinking 从真实安装包验证默认/定制样式、四种状态、明暗与嵌套主题、展开交互及 reduced-motion 降级。
 
 ## 本地开发
 

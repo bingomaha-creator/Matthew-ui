@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { checkBrowserStyles, checkMenuBrowserStyles, checkAutoCompleteBrowserStyles } from './style-checks.mjs'
+import { checkBrowserStyles, checkMenuBrowserStyles, checkAutoCompleteBrowserStyles, checkThinkingBrowserStyles } from './style-checks.mjs'
 
 const writeJson = (path, value) =>
   writeFile(path, `${JSON.stringify(value, null, 2)}\n`)
@@ -159,6 +159,12 @@ export async function checkConsumers({
         consumerDirectory,
       }),
     )
+    await check(`${consumer.label} Chromium preserves mounted full/on-demand Thinking styles`, () =>
+      checkThinkingBrowserStyles({
+        packageRoot: join(consumerDirectory, 'node_modules/matthew-ui'),
+        consumerDirectory,
+      }),
+    )
     await check(`${consumer.label} Vite build preserves on-demand JS and CSS`, async () => {
       for (const scenario of ['subpath-button', 'root-button']) {
         const output = await buildViteScenario(consumerDirectory, scenario)
@@ -171,6 +177,7 @@ export async function checkConsumers({
         assert.match(javascript, /matthew-button/)
         assert.doesNotMatch(javascript, /matthew-menu/)
         assert.doesNotMatch(javascript, /matthew-auto-complete/)
+        assert.doesNotMatch(javascript, /matthew-thinking/)
         assert.equal(cssFiles.length, 0, `${scenario} emitted implicit CSS`)
       }
 
@@ -185,7 +192,7 @@ export async function checkConsumers({
 
       assert.doesNotMatch(
         themeJavascript,
-        /matthew-(?:button|menu|auto-complete)/,
+        /matthew-(?:button|menu|auto-complete|thinking)/,
       )
       assert.equal(
         themeOutput.filter(({ path }) => path.endsWith('.css')).length,
@@ -206,6 +213,7 @@ export async function checkConsumers({
       assert.match(css, /\.matthew-button/)
       assert.doesNotMatch(css, /\.matthew-menu/)
       assert.doesNotMatch(css, /\.matthew-auto-complete/)
+      assert.doesNotMatch(css, /\.matthew-thinking/)
     })
   }
 }

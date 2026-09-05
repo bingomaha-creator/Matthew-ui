@@ -34,6 +34,13 @@ const requiredPackageFiles = [
   'dist/menu/style.css.map',
   'dist/styles.css',
   'dist/styles.css.map',
+  'dist/thinking/index.cjs',
+  'dist/thinking/index.cjs.map',
+  'dist/thinking/index.d.ts',
+  'dist/thinking/index.js',
+  'dist/thinking/index.js.map',
+  'dist/thinking/style.css',
+  'dist/thinking/style.css.map',
   'dist/theme/index.cjs',
   'dist/theme/index.cjs.map',
   'dist/theme/index.d.ts',
@@ -67,6 +74,9 @@ const expectedPublicExports = [
   'MenuSubMenuProps',
   'ThemeProvider',
   'ThemeProviderProps',
+  'Thinking',
+  'ThinkingProps',
+  'ThinkingStatus',
   'createTokens',
   'darkTheme',
   'lightTheme',
@@ -178,6 +188,8 @@ const assertExports = (manifest) => {
     './menu/style.css',
     './styles.css',
     './theme',
+    './thinking',
+    './thinking/style.css',
     './tokens.css',
   ])
   assert.deepEqual(Object.keys(manifest.exports['.']), [
@@ -205,6 +217,11 @@ const assertExports = (manifest) => {
     import: './dist/menu/index.js',
     require: './dist/menu/index.cjs',
   })
+  assert.deepEqual(manifest.exports['./thinking'], {
+    types: './dist/thinking/index.d.ts',
+    import: './dist/thinking/index.js',
+    require: './dist/thinking/index.cjs',
+  })
   assert.deepEqual(manifest.exports['./theme'], {
     types: './dist/theme/index.d.ts',
     import: './dist/theme/index.js',
@@ -221,6 +238,10 @@ const assertExports = (manifest) => {
   assert.equal(
     manifest.exports['./menu/style.css'],
     './dist/menu/style.css',
+  )
+  assert.equal(
+    manifest.exports['./thinking/style.css'],
+    './dist/thinking/style.css',
   )
   assert.equal(manifest.exports['./tokens.css'], './dist/tokens.css')
   assert.equal(manifest.exports['./styles.css'], './dist/styles.css')

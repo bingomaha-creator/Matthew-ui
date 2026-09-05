@@ -73,6 +73,7 @@ const componentStyleEntries = [
   ['Button/Button.scss', 'button/style.css'],
   ['Menu/Menu.scss', 'menu/style.css'],
   ['AutoComplete/AutoComplete.scss', 'auto-complete/style.css'],
+  ['Thinking/Thinking.scss', 'thinking/style.css'],
 ]
 
 for (const [source, output] of componentStyleEntries) {
@@ -85,12 +86,13 @@ for (const [source, output] of componentStyleEntries) {
   await writeCompilation(join(distDirectory, output), result)
 }
 
-// Sass 的 @use 必须位于其他规则之前，所以先引入三份组件源码，
+// Sass 的 @use 必须位于其他规则之前，所以先引入各组件源码，
 // 再追加与 tokens.css 共用的生成 :root。全量包因此不再读取 _tokens.scss。
 const globalAdapterSource = [
   '@use "src/components/Button/Button";',
   '@use "src/components/Menu/Menu";',
   '@use "src/components/AutoComplete/AutoComplete";',
+  '@use "src/components/Thinking/Thinking";',
   tokenAdapterSource,
 ].join('\n')
 const globalResult = compileString(globalAdapterSource, {

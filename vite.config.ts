@@ -19,6 +19,10 @@ export default defineConfig({
           import.meta.dirname,
           'src/components/AutoComplete/index.ts',
         ),
+        thinking: resolve(
+          import.meta.dirname,
+          'src/components/Thinking/index.ts',
+        ),
         theme: resolve(import.meta.dirname, 'src/theme/index.ts'),
       },
       formats: ['es', 'cjs'],

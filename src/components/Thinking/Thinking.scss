@@ -1,0 +1,155 @@
+@use '../../styles/mixins' as mixins;
+
+// 运行中圆点的错峰跳动；keyframes挂在matthew-thinking命名空间下，不污染消费端全局。
+@keyframes matthew-thinking-dot-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: translateY(-0.125rem);
+    opacity: 1;
+  }
+}
+
+.matthew-thinking {
+  // 根节点透明：无外层边框、阴影和独立卡片观感（TH-V01）。
+  color: var(--matthew-ui-color-text);
+  font: inherit;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--matthew-ui-thinking-header-min-height, var(--matthew-ui-control-height-md));
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: var(--matthew-ui-thinking-radius, var(--matthew-ui-radius-md));
+    background: transparent;
+    color: var(--matthew-ui-thinking-title-color, var(--matthew-ui-color-text));
+    font: inherit;
+    font-size: var(--matthew-ui-font-size-md);
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+
+    @include mixins.focus-ring;
+
+    &:hover {
+      background: var(--matthew-ui-thinking-header-hover-background, var(--matthew-ui-color-surface-hover));
+    }
+  }
+
+  // 状态标识只用图形与颜色表达，且不开放替换prop（TH-V02）。
+  &__status {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 0.75rem;
+    height: 0.75rem;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__dots {
+    display: inline-flex;
+    gap: 0.125rem;
+    align-items: center;
+
+    span {
+      width: 0.25rem;
+      height: 0.25rem;
+      border-radius: 50%;
+      background: var(--matthew-ui-thinking-running-color, var(--matthew-ui-color-primary));
+      animation: matthew-thinking-dot-bounce 0.9s ease-in-out infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+    }
+  }
+
+  &__square {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--matthew-ui-thinking-stopped-color, var(--matthew-ui-color-text-muted));
+  }
+
+  &__check {
+    color: var(--matthew-ui-thinking-completed-color, var(--matthew-ui-color-primary-active));
+  }
+
+  &__bang {
+    color: var(--matthew-ui-thinking-error-color, var(--matthew-ui-color-danger));
+  }
+
+  &__title {
+    overflow: hidden;
+    flex: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // 可见图形已有形状差异；这段文案只用于辅助技术表达状态。
+  &__status-label {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    border: 0;
+    margin: -1px;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  &__arrow {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    // 默认指向下方；展开后整体旋转180°（45deg + 180deg）。
+    transform: rotate(45deg);
+    transition: transform var(--matthew-ui-duration-fast) ease;
+  }
+
+  &__header[aria-expanded='true'] &__arrow {
+    transform: rotate(225deg);
+  }
+
+  &__content {
+    box-sizing: border-box;
+    margin-left: 1.375rem;
+    padding: 0 0.75rem 0.5rem 0.875rem;
+    border-left: 1px solid var(--matthew-ui-thinking-border-color, var(--matthew-ui-color-border));
+    color: var(--matthew-ui-thinking-content-color, var(--matthew-ui-color-text-muted));
+    font-size: var(--matthew-ui-font-size-sm);
+    // 内容自然换行撑高；不设最大高度、内部滚动或文本截断（TH-V01）。
+    overflow-wrap: anywhere;
+  }
+}
+
+// reduced motion下停止圆点跳动与箭头过渡，保留三个静态圆点（TH-V03）。
+@media (prefers-reduced-motion: reduce) {
+  .matthew-thinking__dots span {
+    animation: none;
+  }
+
+  .matthew-thinking__arrow {
+    transition: none;
+  }
+}

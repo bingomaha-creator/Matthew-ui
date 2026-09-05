@@ -21,6 +21,12 @@ export type {
   AutoCompleteProps,
 } from './components/AutoComplete'
 
+export { Thinking } from './components/Thinking'
+export type {
+  ThinkingProps,
+  ThinkingStatus,
+} from './components/Thinking'
+
 export {
   createTokens,
   darkTheme,
