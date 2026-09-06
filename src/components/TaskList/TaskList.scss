@@ -1,0 +1,242 @@
+@use '../../styles/mixins' as mixins;
+
+// 只有 running 的缺口圆环持续旋转（TL-V05）；keyframes挂在matthew-task-list命名空间下。
+@keyframes matthew-task-list-ring-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.matthew-task-list {
+  // 独立任务级面板：淡色外框 + surface 背景，无阴影（TL-V01）。
+  // 稳定宽度：不随标题、摘要或任务数量变化（width: min(30rem, 100%)）。
+  display: block;
+  box-sizing: border-box;
+  width: min(30rem, 100%);
+  // 容器查询基准（TL-V08）：响应式行为按组件可用宽度而非浏览器视口判断。
+  container-type: inline-size;
+  border: 1px solid var(--matthew-ui-task-list-border-color, var(--matthew-ui-color-border));
+  border-radius: var(--matthew-ui-task-list-radius, var(--matthew-ui-radius-md));
+  background: var(--matthew-ui-task-list-background, var(--matthew-ui-color-surface));
+  color: var(--matthew-ui-color-text);
+  font: inherit;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--matthew-ui-task-list-header-min-height, var(--matthew-ui-control-height-md));
+    padding: 0.625rem 0.875rem;
+    border: none;
+    background: transparent;
+    color: var(--matthew-ui-task-list-title-color, var(--matthew-ui-color-text));
+    font: inherit;
+    font-size: var(--matthew-ui-font-size-md);
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+
+    @include mixins.focus-ring;
+
+    &:hover {
+      background: var(--matthew-ui-task-list-header-hover-background, var(--matthew-ui-color-surface-hover));
+    }
+  }
+
+  &__title {
+    overflow: hidden;
+    flex: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__progress {
+    flex: none;
+    // 摘要 12px、弱化颜色，tabular numbers 避免数字变化宽度抖动（TL-V02）。
+    font-size: 0.75rem;
+    color: var(--matthew-ui-task-list-progress-color, var(--matthew-ui-color-text-muted));
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__arrow {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    // 默认指向下方；折叠后旋转回上方（45deg ↔ 225deg）。
+    transform: rotate(225deg);
+    transition: transform var(--matthew-ui-duration-fast) ease;
+  }
+
+  &__header[aria-expanded='false'] &__arrow {
+    transform: rotate(45deg);
+  }
+
+  &__list {
+    margin: 0;
+    padding: 0.25rem 0 0.5rem;
+    overflow: hidden;
+    list-style: none;
+    // 有任务时标题栏与列表之间的 1px 分隔线；空列表展开时不绘制悬空分隔线（TL-V02）。
+    &:not(:empty) {
+      border-top: 1px solid var(--matthew-ui-task-list-border-color, var(--matthew-ui-color-border));
+    }
+  }
+
+  &__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5625rem;
+    box-sizing: border-box;
+    min-height: var(--matthew-ui-task-list-item-min-height, 2.125rem);
+    padding: 0.375rem 0.875rem;
+  }
+
+  // 相邻状态图形之间的淡色连接线（TL-V04）：从上一个图形底部到下一个图形顶部，
+  // 不穿过图形、不超出首尾任务；空列表与单条任务自然无线段。
+  &__item + &__item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: calc(50% - 0.375rem);
+    left: calc(0.875rem + 0.375rem);
+    background: var(--matthew-ui-task-list-border-color, var(--matthew-ui-color-border));
+  }
+
+  &__item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: calc(50% + 0.375rem);
+    bottom: 0;
+    width: 1px;
+    left: calc(0.875rem + 0.375rem);
+    background: var(--matthew-ui-task-list-border-color, var(--matthew-ui-color-border));
+  }
+
+  &__status {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 0.75rem;
+    height: 0.75rem;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // pending：空心圆（TL-V04）。
+  &__hollow {
+    box-sizing: border-box;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1.5px solid var(--matthew-ui-task-list-pending-color, var(--matthew-ui-color-text-muted));
+    border-radius: 50%;
+  }
+
+  // running：缺口圆环，一侧透明形成缺口，匀速轻量旋转。
+  &__ring {
+    box-sizing: border-box;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 1.5px solid var(--matthew-ui-task-list-running-color, var(--matthew-ui-color-primary));
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    animation: matthew-task-list-ring-spin 0.9s linear infinite;
+  }
+
+  // completed：圆形底 + 对勾；对勾用 surface 色在圆形底上保持对比。
+  &__check {
+    color: var(--matthew-ui-task-list-completed-color, var(--matthew-ui-color-primary-active));
+  }
+
+  &__check-mark {
+    stroke: var(--matthew-ui-task-list-background, var(--matthew-ui-color-surface));
+  }
+
+  &__bang {
+    color: var(--matthew-ui-task-list-error-color, var(--matthew-ui-color-danger));
+  }
+
+  &__square {
+    width: 0.625rem;
+    height: 0.625rem;
+    background: var(--matthew-ui-task-list-stopped-color, var(--matthew-ui-color-text-muted));
+  }
+
+  &__item-title {
+    overflow: hidden;
+    flex: 1;
+    font-size: var(--matthew-ui-font-size-sm);
+    font-weight: 400;
+    color: var(--matthew-ui-task-list-item-color, var(--matthew-ui-color-text));
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // completed 标题弱化为摘要色，不使用删除线或整行 opacity（TL-V03）。
+  &__item[data-status='completed'] &__item-title {
+    color: var(--matthew-ui-task-list-summary-color, var(--matthew-ui-color-text-muted));
+  }
+
+  // running 标题 500 字重，成为列表内最容易识别的任务行。
+  &__item[data-status='running'] &__item-title {
+    font-weight: 500;
+  }
+
+  &__summary {
+    overflow: hidden;
+    flex: none;
+    max-width: 40%;
+    font-size: 0.75rem;
+    color: var(--matthew-ui-task-list-summary-color, var(--matthew-ui-color-text-muted));
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // 状态文案以视觉隐藏文本加入条目可访问内容（TL-B06）。
+  &__sr-status {
+    position: absolute;
+    overflow: hidden;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    white-space: nowrap;
+  }
+}
+
+// reduced motion下停止圆环旋转与箭头过渡，保留静态缺口（TL-V05）。
+@media (prefers-reduced-motion: reduce) {
+  .matthew-task-list__ring {
+    animation: none;
+  }
+
+  .matthew-task-list__arrow {
+    transition: none;
+  }
+}
+
+// 组件可用宽度 320px 及更窄时优先保留状态图形、任务标题、总体摘要与箭头；
+// 行摘要视觉隐藏但保留辅助技术内容，不用 display:none 意外丢失（TL-V08）。
+// 容器查询基于 TaskList 根节点的 inline-size，宽页面中的窄容器同样生效。
+@container (max-width: 320px) {
+  .matthew-task-list__summary {
+    position: absolute;
+    overflow: hidden;
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+  }
+}

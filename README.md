@@ -418,6 +418,77 @@ export function AgentToolCalls() {
 五种状态图形、与 Thinking 组合的视觉层级、亮暗主题、12 字段精确覆盖、
 动态启用/撤销主题作用域、320px 窄宽摘要隐藏与 reduced-motion 降级效果。
 
+### TaskList 组件定制
+
+TaskList 可以从包根入口引入，也可以同时按需拆分 JavaScript 和 CSS：
+
+```tsx
+import { TaskList } from 'matthew-ui/task-list'
+import { ThemeProvider } from 'matthew-ui/theme'
+import 'matthew-ui/tokens.css'
+import 'matthew-ui/task-list/style.css'
+// 全量引入时，将上面两条CSS替换为 import 'matthew-ui/styles.css'
+
+const items = [
+  { id: 'contract', title: '确认合同', status: 'completed', summary: '已评审' },
+  { id: 'quality', title: '质量检查', status: 'running', summary: '正在执行…' },
+  { id: 'verify', title: '复核发布包', status: 'pending' },
+]
+
+export function AgentPlan() {
+  return (
+    <ThemeProvider theme={{ components: { TaskList: {
+      runningColor: '#7c3aed',
+      errorColor: '#b91c1c',
+      borderRadius: 6,
+    } } }}>
+      <TaskList title="实施计划" items={items} />
+    </ThemeProvider>
+  )
+}
+```
+
+`theme.components.TaskList` 的15个字段均可选：
+
+| 字段 | 类型 | 公开 CSS 变量 |
+| --- | --- | --- |
+| background | string | --matthew-ui-task-list-background |
+| borderColor | string | --matthew-ui-task-list-border-color |
+| titleColor | string | --matthew-ui-task-list-title-color |
+| progressColor | string | --matthew-ui-task-list-progress-color |
+| itemColor | string | --matthew-ui-task-list-item-color |
+| summaryColor | string | --matthew-ui-task-list-summary-color |
+| headerHoverBackground | string | --matthew-ui-task-list-header-hover-background |
+| pendingColor | string | --matthew-ui-task-list-pending-color |
+| runningColor | string | --matthew-ui-task-list-running-color |
+| completedColor | string | --matthew-ui-task-list-completed-color |
+| errorColor | string | --matthew-ui-task-list-error-color |
+| stoppedColor | string | --matthew-ui-task-list-stopped-color |
+| borderRadius | number ≥ 0 | --matthew-ui-task-list-radius |
+| headerMinHeight | number > 0 | --matthew-ui-task-list-header-min-height |
+| itemMinHeight | number > 0 | --matthew-ui-task-list-item-min-height |
+
+- 数字是设计 px，以16为基准转换为 rem；类型、有限数与范围校验规则与其他组件 Token
+  一致；圆角可为 0，标题栏与任务行最小高度必须大于 0。默认标题栏 40px
+  （controlHeightMd）、任务行 34px、标题 14px、任务标题 13px、摘要 12px，跟随全局
+  Token，显式组件字段优先。
+- 颜色字段只接受 CSS 字符串，彼此不派生；未提供的字段继续读取当前全局 Token：
+  背景 colorSurface，外框/分隔线/连接线 colorBorder，标题/任务 colorText，总体摘要/
+  行摘要/完成标题 colorTextMuted，running colorPrimary，completed colorPrimaryActive，
+  error colorDanger，pending/stopped colorTextMuted。
+- 面板默认宽度稳定为 `width: min(30rem, 100%)`（根字号 16px 时 320–480px），
+  不随标题、摘要或任务数量变化；窄容器响应式（如 320px 及更窄时隐藏任务行摘要）
+  基于容器查询按组件可用宽度判断，而非浏览器视口。不开放宽度 Token，调用方可用
+  正常 CSS 覆盖。
+- 父子 Provider 按字段继承；空对象和 `undefined` 不擦除父值，撤销当前层覆盖后恢复
+  父值或 CSS 默认回退。
+- 业务祖先或 TaskList 根节点也可以直接设置上表中的公开变量，按正常 CSS 级联和继承生效。
+
+本地运行 `npm run storybook`，在 `Components / TaskList` 查看默认展开与折叠、
+空列表、五种状态图形与并行 running、动态增删重排、与 Thinking/ToolCall 的
+三层组合、亮暗主题、15 字段精确覆盖、动态启用/撤销主题作用域、320px 窄宽
+摘要隐藏与 reduced-motion 降级效果。
+
 ## 组件
 
 ### Button 与 LinkButton
@@ -573,6 +644,31 @@ export function ToolActivity() {
 以视觉隐藏文本加入可访问名称；组件不内置语言文案。原生 `div` 属性（含 `title`）
 保持透传。
 
+### TaskList
+
+```tsx
+import { TaskList } from 'matthew-ui'
+
+const items = [
+  { id: 'contract', title: '确认合同', status: 'completed', summary: '已评审' },
+  { id: 'quality', title: '质量检查', status: 'running', summary: '正在执行…' },
+  { id: 'verify', title: '复核发布包', status: 'pending' },
+]
+
+export function AgentPlan() {
+  return <TaskList title="实施计划" items={items} />
+}
+```
+
+`title` 与 `items` 必填：`title` 是面向用户的任务标题，`items` 是只读条目数组，
+每个条目的 `id`、`title`、`status` 必填（`summary` 可选），`id` 是调用方维护的
+稳定唯一身份。模块自动显示语言无关的 `completed / total` 摘要（只统计
+`completed`），空列表不显示摘要。默认展开，`open/onOpenChange` 受控或
+`defaultOpen` 非受控，折叠后列表保持挂载；条目严格按数组顺序渲染，支持动态
+增删、重排和状态更新。`statusLabels` 可选，必须提供五种状态的本地化文案，
+以视觉隐藏文本加入条目可访问内容。条目是只读 `li`，模块不内置编辑、重试、
+取消或行内操作。
+
 ## 公开入口
 
 | 入口 | 内容 |
@@ -583,6 +679,7 @@ export function ToolActivity() {
 | `matthew-ui/auto-complete` | AutoComplete 及对应类型 |
 | `matthew-ui/thinking` | Thinking 及对应类型 |
 | `matthew-ui/tool-call` | ToolCall 及对应类型 |
+| `matthew-ui/task-list` | TaskList/TaskStatus/TaskListItem 及对应类型 |
 | `matthew-ui/theme` | ThemeProvider、主题预设、Token API 及对应类型 |
 | `matthew-ui/tokens.css` | 默认亮色 `:root` Token |
 | `matthew-ui/button/style.css` | Button/LinkButton 样式 |
@@ -590,21 +687,23 @@ export function ToolActivity() {
 | `matthew-ui/auto-complete/style.css` | AutoComplete 样式 |
 | `matthew-ui/thinking/style.css` | Thinking 样式 |
 | `matthew-ui/tool-call/style.css` | ToolCall 样式 |
+| `matthew-ui/task-list/style.css` | TaskList 样式 |
 | `matthew-ui/styles.css` | Token 与全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
 
 ## 质量验证
 
-- 299 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
-- 47 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
-- 52 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
+- 344 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
+- 57 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
+- 63 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
 - 真实 `npm pack` tarball 会分别安装到 React 18.2 与 React 19 临时消费端，验证 ESM、CommonJS、类型、CSS、DOM ref、公开入口边界和 Vite Tree Shaking。
 - Chromium 验证无 Provider 的默认 Token 回退，以及按需/全量 CSS 的 Button/LinkButton 定制尺寸、颜色、真实 hover/active 与作用域隔离。
 - Menu还经过真实挂载，验证两种CSS模式的默认/定制尺寸、选中悬停、父标题和浮层；不以SSR静态标记代替子菜单注册与展开。
 - AutoComplete同样从真实安装包挂载，验证两种CSS模式的默认/定制输入、异步加载、候选高亮与回填、禁用/只读及暗色浮层；不以变量输出代替最终样式。
 - Thinking 从真实安装包验证默认/定制样式、四种状态、明暗与嵌套主题、展开交互及 reduced-motion 降级。
 - ToolCall 从真实安装包验证默认/定制样式、五种状态图形与颜色、无详情状态行、明暗与嵌套主题、320px 窄宽摘要隐藏及 reduced-motion 圆环降级。
+- TaskList 从真实安装包验证默认/定制面板样式、宽度约束、五种状态图形与连接线、明暗与嵌套主题、折叠挂载、320px 窄宽摘要隐藏及 reduced-motion 圆环降级。
 
 ## 本地开发
 

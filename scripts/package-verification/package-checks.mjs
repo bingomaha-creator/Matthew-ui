@@ -48,6 +48,13 @@ const requiredPackageFiles = [
   'dist/tool-call/index.js.map',
   'dist/tool-call/style.css',
   'dist/tool-call/style.css.map',
+  'dist/task-list/index.cjs',
+  'dist/task-list/index.cjs.map',
+  'dist/task-list/index.d.ts',
+  'dist/task-list/index.js',
+  'dist/task-list/index.js.map',
+  'dist/task-list/style.css',
+  'dist/task-list/style.css.map',
   'dist/theme/index.cjs',
   'dist/theme/index.cjs.map',
   'dist/theme/index.d.ts',
@@ -79,6 +86,10 @@ const expectedPublicExports = [
   'MenuMode',
   'MenuProps',
   'MenuSubMenuProps',
+  'TaskList',
+  'TaskListItem',
+  'TaskListProps',
+  'TaskStatus',
   'ThemeProvider',
   'ThemeProviderProps',
   'Thinking',
@@ -197,6 +208,8 @@ const assertExports = (manifest) => {
     './menu',
     './menu/style.css',
     './styles.css',
+    './task-list',
+    './task-list/style.css',
     './theme',
     './thinking',
     './thinking/style.css',
@@ -239,6 +252,11 @@ const assertExports = (manifest) => {
     import: './dist/tool-call/index.js',
     require: './dist/tool-call/index.cjs',
   })
+  assert.deepEqual(manifest.exports['./task-list'], {
+    types: './dist/task-list/index.d.ts',
+    import: './dist/task-list/index.js',
+    require: './dist/task-list/index.cjs',
+  })
   assert.deepEqual(manifest.exports['./theme'], {
     types: './dist/theme/index.d.ts',
     import: './dist/theme/index.js',
@@ -263,6 +281,10 @@ const assertExports = (manifest) => {
   assert.equal(
     manifest.exports['./tool-call/style.css'],
     './dist/tool-call/style.css',
+  )
+  assert.equal(
+    manifest.exports['./task-list/style.css'],
+    './dist/task-list/style.css',
   )
   assert.equal(manifest.exports['./tokens.css'], './dist/tokens.css')
   assert.equal(manifest.exports['./styles.css'], './dist/styles.css')

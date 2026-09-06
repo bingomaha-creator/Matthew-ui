@@ -13,6 +13,7 @@ import { menuTokensToCssVars } from './menuComponentTokens'
 import { autoCompleteTokensToCssVars } from './autoCompleteComponentTokens'
 import { thinkingTokensToCssVars } from './thinkingComponentTokens'
 import { toolCallTokensToCssVars } from './toolCallComponentTokens'
+import { taskListTokensToCssVars } from './taskListComponentTokens'
 
 export interface ThemeProviderProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
@@ -62,6 +63,10 @@ function mergeThemeConfig(
         parentTheme?.components?.ToolCall,
         theme?.components?.ToolCall,
       ),
+      TaskList: mergeDefinedFields(
+        parentTheme?.components?.TaskList,
+        theme?.components?.TaskList,
+      ),
       Menu: mergeDefinedFields(
         parentTheme?.components?.Menu,
         theme?.components?.Menu,
@@ -94,6 +99,7 @@ export function ThemeProvider({
     ...autoCompleteTokensToCssVars(mergedTheme.components?.AutoComplete),
     ...thinkingTokensToCssVars(mergedTheme.components?.Thinking),
     ...toolCallTokensToCssVars(mergedTheme.components?.ToolCall),
+    ...taskListTokensToCssVars(mergedTheme.components?.TaskList),
   }
 
   // 只覆盖配置实际输出的变量；无配置时不写组件默认值，让 CSS 继承继续工作。

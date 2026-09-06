@@ -66,6 +66,12 @@
       "require": "./dist/tool-call/index.cjs"
     },
     "./tool-call/style.css": "./dist/tool-call/style.css",
+    "./task-list": {
+      "types": "./dist/task-list/index.d.ts",
+      "import": "./dist/task-list/index.js",
+      "require": "./dist/task-list/index.cjs"
+    },
+    "./task-list/style.css": "./dist/task-list/style.css",
     "./theme": {
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.js",

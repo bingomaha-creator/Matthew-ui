@@ -8,6 +8,7 @@ export default {
     'auto-complete': 'src/components/AutoComplete/index.ts',
     thinking: 'src/components/Thinking/index.ts',
     'tool-call': 'src/components/ToolCall/index.ts',
+    'task-list': 'src/components/TaskList/index.ts',
     theme: 'src/theme/index.ts',
   },
   output: {

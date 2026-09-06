@@ -27,6 +27,10 @@ export default defineConfig({
           import.meta.dirname,
           'src/components/ToolCall/index.ts',
         ),
+        'task-list': resolve(
+          import.meta.dirname,
+          'src/components/TaskList/index.ts',
+        ),
         theme: resolve(import.meta.dirname, 'src/theme/index.ts'),
       },
       formats: ['es', 'cjs'],

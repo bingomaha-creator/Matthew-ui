@@ -39,6 +39,7 @@ const {
   darkTheme,
   LinkButton,
   Menu,
+  TaskList,
   ThemeProvider,
   Thinking,
   ToolCall,
@@ -50,6 +51,7 @@ const anchorRef = createRef()
 const inputRef = createRef()
 const thinkingRef = createRef()
 const toolCallRef = createRef()
+const taskListRef = createRef()
 const container = document.querySelector('#root')
 const root = createRoot(container)
 
@@ -89,6 +91,12 @@ flushSync(() => {
         'data-ref-target': 'tool-call',
         ref: toolCallRef,
       }, '步骤'),
+      createElement(TaskList, {
+        title: '实施计划',
+        items: [{ id: 'a', title: '任务一', status: 'running' }],
+        'data-ref-target': 'task-list',
+        ref: taskListRef,
+      }),
       createElement(
         Menu,
         { 'aria-label': 'Navigation' },
@@ -113,6 +121,12 @@ assert.strictEqual(
   container.querySelector('[data-ref-target="tool-call"]'),
 )
 assert.ok(toolCallRef.current.isConnected)
+assert.ok(taskListRef.current instanceof window.HTMLDivElement)
+assert.strictEqual(
+  taskListRef.current,
+  container.querySelector('[data-ref-target="task-list"]'),
+)
+assert.ok(taskListRef.current.isConnected)
 assert.strictEqual(
   buttonRef.current,
   container.querySelector('[data-ref-target="button"]'),

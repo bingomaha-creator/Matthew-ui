@@ -75,6 +75,7 @@ const componentStyleEntries = [
   ['AutoComplete/AutoComplete.scss', 'auto-complete/style.css'],
   ['Thinking/Thinking.scss', 'thinking/style.css'],
   ['ToolCall/ToolCall.scss', 'tool-call/style.css'],
+  ['TaskList/TaskList.scss', 'task-list/style.css'],
 ]
 
 for (const [source, output] of componentStyleEntries) {
@@ -95,6 +96,7 @@ const globalAdapterSource = [
   '@use "src/components/AutoComplete/AutoComplete";',
   '@use "src/components/Thinking/Thinking";',
   '@use "src/components/ToolCall/ToolCall";',
+  '@use "src/components/TaskList/TaskList";',
   tokenAdapterSource,
 ].join('\n')
 const globalResult = compileString(globalAdapterSource, {

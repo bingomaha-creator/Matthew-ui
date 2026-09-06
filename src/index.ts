@@ -33,6 +33,13 @@ export type {
   ToolCallStatus,
 } from './components/ToolCall'
 
+export { TaskList } from './components/TaskList'
+export type {
+  TaskListItem,
+  TaskListProps,
+  TaskStatus,
+} from './components/TaskList'
+
 export {
   createTokens,
   darkTheme,

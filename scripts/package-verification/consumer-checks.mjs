@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { checkBrowserStyles, checkMenuBrowserStyles, checkAutoCompleteBrowserStyles, checkThinkingBrowserStyles, checkToolCallBrowserStyles } from './style-checks.mjs'
+import { checkBrowserStyles, checkMenuBrowserStyles, checkAutoCompleteBrowserStyles, checkThinkingBrowserStyles, checkToolCallBrowserStyles, checkTaskListBrowserStyles } from './style-checks.mjs'
 
 const writeJson = (path, value) =>
   writeFile(path, `${JSON.stringify(value, null, 2)}\n`)
@@ -171,6 +171,12 @@ export async function checkConsumers({
         consumerDirectory,
       }),
     )
+    await check(`${consumer.label} Chromium preserves mounted full/on-demand TaskList styles`, () =>
+      checkTaskListBrowserStyles({
+        packageRoot: join(consumerDirectory, 'node_modules/matthew-ui'),
+        consumerDirectory,
+      }),
+    )
     await check(`${consumer.label} Vite build preserves on-demand JS and CSS`, async () => {
       for (const scenario of ['subpath-button', 'root-button']) {
         const output = await buildViteScenario(consumerDirectory, scenario)
@@ -185,6 +191,7 @@ export async function checkConsumers({
         assert.doesNotMatch(javascript, /matthew-auto-complete/)
         assert.doesNotMatch(javascript, /matthew-thinking/)
         assert.doesNotMatch(javascript, /matthew-tool-call/)
+        assert.doesNotMatch(javascript, /matthew-task-list/)
         assert.equal(cssFiles.length, 0, `${scenario} emitted implicit CSS`)
       }
 
@@ -199,7 +206,7 @@ export async function checkConsumers({
 
       assert.doesNotMatch(
         themeJavascript,
-        /matthew-(?:button|menu|auto-complete|thinking|tool-call)/,
+        /matthew-(?:button|menu|auto-complete|thinking|tool-call|task-list)/,
       )
       assert.equal(
         themeOutput.filter(({ path }) => path.endsWith('.css')).length,
@@ -222,6 +229,7 @@ export async function checkConsumers({
       assert.doesNotMatch(css, /\.matthew-auto-complete/)
       assert.doesNotMatch(css, /\.matthew-thinking/)
       assert.doesNotMatch(css, /\.matthew-tool-call/)
+      assert.doesNotMatch(css, /\.matthew-task-list/)
     })
   }
 }

@@ -7,6 +7,7 @@ import {
   lightTheme,
   LinkButton,
   Menu,
+  TaskList,
   ThemeProvider,
   Thinking,
   ToolCall,
@@ -16,6 +17,7 @@ import { Button as SubpathButton } from 'matthew-ui/button'
 import { AutoComplete as SubpathAutoComplete } from 'matthew-ui/auto-complete'
 import { Thinking as SubpathThinking } from 'matthew-ui/thinking'
 import { ToolCall as SubpathToolCall } from 'matthew-ui/tool-call'
+import { TaskList as SubpathTaskList } from 'matthew-ui/task-list'
 import {
   darkTheme as subpathDarkTheme,
   ThemeProvider as SubpathThemeProvider,
@@ -42,10 +44,14 @@ import type {
   ThinkingStatus,
   ToolCallProps,
   ToolCallStatus,
+  TaskListItem,
+  TaskListProps,
+  TaskStatus,
 } from 'matthew-ui'
 import type { ButtonProps as SubpathButtonProps } from 'matthew-ui/button'
 import type { ThinkingProps as SubpathThinkingProps } from 'matthew-ui/thinking'
 import type { ToolCallProps as SubpathToolCallProps } from 'matthew-ui/tool-call'
+import type { TaskListProps as SubpathTaskListProps } from 'matthew-ui/task-list'
 import type {
   AutoCompleteProps as SubpathAutoCompleteProps,
 } from 'matthew-ui/auto-complete'
@@ -75,6 +81,9 @@ type PublicTypeContract = [
   ThinkingStatus,
   ToolCallProps,
   ToolCallStatus,
+  TaskListItem,
+  TaskListProps,
+  TaskStatus,
   MatthewSeedToken,
   MatthewThemeConfig,
   MatthewThemeTokens,
@@ -84,6 +93,7 @@ type PublicTypeContract = [
   SubpathAutoCompleteProps<PlayerOption>,
   SubpathThinkingProps,
   SubpathToolCallProps,
+  SubpathTaskListProps,
   SubpathThemeConfig,
 ]
 
@@ -197,6 +207,45 @@ const invalidToolCallLabels: ToolCallProps = {
   statusLabels: { running: '执行中' },
 }
 void [invalidToolCallRadius, invalidToolCallLabels]
+
+const taskListItems: TaskListItem[] = [
+  { id: 'contract', title: '确认合同', status: 'completed', summary: '已评审' },
+  { id: 'quality', title: '质量检查', status: 'running' },
+  { id: 'verify', title: '复核发布包', status: 'pending' },
+]
+const controlledTaskList = (
+  <TaskList
+    ref={divRef}
+    title="实施计划"
+    items={taskListItems}
+    statusLabels={{
+      pending: '排队中', running: '执行中', completed: '已完成',
+      error: '失败', stopped: '已中止',
+    }}
+    onOpenChange={(nextOpen) => void nextOpen}
+  />
+)
+const subpathTaskList = (
+  <SubpathTaskList title="子路径计划" items={taskListItems} />
+)
+const taskListTheme: MatthewThemeConfig = { components: { TaskList: {
+  background: 'white', borderColor: 'gray', titleColor: '#0f172a', progressColor: 'gray',
+  itemColor: 'black', summaryColor: 'gray', headerHoverBackground: 'white',
+  pendingColor: 'gray', runningColor: 'green', completedColor: 'cyan',
+  errorColor: 'red', stoppedColor: 'gray', borderRadius: 0, headerMinHeight: 48, itemMinHeight: 40,
+} } }
+void [controlledTaskList, subpathTaskList, taskListTheme]
+
+// @ts-expect-error TaskList 圆角不允许字符串尺寸。
+const invalidTaskListRadius: MatthewThemeConfig = { components: { TaskList: { borderRadius: '8px' } } }
+const invalidTaskListItem: TaskListProps = {
+  title: '实施计划',
+  items: [
+    // @ts-expect-error 条目缺少必填 status。
+    { id: 'a', title: '任务一' },
+  ],
+}
+void [invalidTaskListRadius, invalidTaskListItem]
 
 const autoCompleteSubpathConfig: SubpathThemeConfig = autoCompleteTheme
 const autoCompleteSubpathProvider = <SubpathThemeProvider theme={autoCompleteSubpathConfig}>配置</SubpathThemeProvider>
