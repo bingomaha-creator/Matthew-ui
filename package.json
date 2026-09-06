@@ -1,6 +1,6 @@
 {
   "name": "matthew-ui",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A typed React UI component library with Button, Menu, AutoComplete, and agent-native components.",
   "keywords": [
     "react",
