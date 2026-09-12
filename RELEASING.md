@@ -2,11 +2,14 @@
 
 ## Current state
 
-- `matthew-ui@0.2.0` is published on npm with `latest=0.2.0`.
-- Registry `gitHead`, remote `v0.2.0`, and the GitHub Release resolve to
-  `8f3ccf8da39c8bd03916b1da6e4fe079d9516cb4`.
-- `0.2.0` was the first normal OIDC release. It was published by the protected
-  GitHub `npm-release` environment through npm Trusted Publishing.
+- `matthew-ui@0.3.0` is published on npm with `latest=0.3.0`.
+- Registry `gitHead`, remote `v0.3.0`, and the GitHub Release resolve to
+  `c8127143be431eb883263b1f40acd4b0d9f2e17b`.
+- `0.3.0` was published by the protected GitHub `npm-release` environment
+  through npm Trusted Publishing, with SLSA provenance recorded by the npm
+  registry. Its public tarball contains 87 files and is approximately 97.2 kB.
+- `0.2.0` was the first normal OIDC release through the same protected
+  environment and Trusted Publishing flow.
 - `0.1.0` was a one-time local bootstrap publish because a brand-new package
   cannot configure Trusted Publishing or use npm Staged Publishing first.
 - `v0.1.0` intentionally has no GitHub Release. Creating one with the current
