@@ -30,7 +30,7 @@ const getRoot = (screen: { container: HTMLElement }) =>
 const styleOf = (element: Element) => getComputedStyle(element)
 
 describe('ToolCall visual contract', () => {
-  test('uses global token defaults and keeps the root lighter than Thinking', async () => {
+  test('aligns the default header with Thinking and preserves lightweight details', async () => {
     const screen = await render(harness(
       <>
         <Thinking title="正在分析项目">过程内容</Thinking>
@@ -46,17 +46,25 @@ describe('ToolCall visual contract', () => {
     // 根透明，无完整卡片观感（TC-V01）。
     expect(styleOf(root).backgroundColor).toBe('rgba(0, 0, 0, 0)')
     expect(styleOf(root).boxShadow).toBe('none')
-    // 比 Thinking 更小：32px vs 40px（TC-V07）。
-    expect(headerStyle.minHeight).toBe('32px')
-    expect(styleOf(screen.container.querySelector('.matthew-thinking__header')!).minHeight).toBe('40px')
+    const thinkingStyle = styleOf(screen.container.querySelector('.matthew-thinking__header')!)
+    expect(headerStyle.minHeight).toBe('40px')
+    for (const key of ['minHeight', 'padding', 'gap', 'fontSize', 'fontWeight', 'fontFamily'] as const) {
+      expect(headerStyle[key]).toBe(thinkingStyle[key])
+    }
+    expect(headerStyle.fontFamily).toBe('monospace')
+    expect(headerStyle.padding).toBe('8px 12px')
+    expect(headerStyle.gap).toBe('10px')
+    expect(styleOf(root.querySelector('.matthew-tool-call__status')!).width).toBe('12px')
     expect(headerStyle.borderRadius).toBe('8px')
 
     const name = root.querySelector('.matthew-tool-call__name')!
-    expect(styleOf(name).fontSize).toBe('13px')
+    expect(styleOf(name).fontSize).toBe('14px')
     expect(styleOf(name).fontWeight).toBe('500')
     expect(styleOf(name).color).toBe('rgb(15, 23, 42)')
     const summary = root.querySelector('.matthew-tool-call__summary')!
-    expect(styleOf(summary).fontSize).toBe('12px')
+    expect(styleOf(summary).fontSize).toBe('14px')
+    expect(styleOf(summary).fontWeight).toBe('400')
+    expect(styleOf(summary).textAlign).toBe('right')
     expect(styleOf(summary).color).toBe('rgb(100, 116, 139)')
 
     const detail = document.getElementById(header.getAttribute('aria-controls')!)
@@ -66,6 +74,74 @@ describe('ToolCall visual contract', () => {
     expect(detailStyle.borderLeftWidth).toBe('1px')
     expect(detailStyle.borderLeftColor).toBe('rgb(203, 213, 225)')
     expect(detailStyle.maxHeight).toBe('none')
+    const arrow = root.querySelector('.matthew-tool-call__arrow')!
+    const thinkingArrow = screen.container.querySelector('.matthew-thinking__arrow')!
+    expect(styleOf(arrow).transform).toBe(styleOf(thinkingArrow).transform)
+    await screen.getByRole('button', { name: /读取项目文件/ }).click()
+    await screen.getByRole('button', { name: /正在分析项目/ }).click()
+    await expect.poll(() => styleOf(arrow).transform).toBe('matrix(-0.707107, -0.707107, 0.707107, -0.707107, 0, 0)')
+    await expect.poll(() => styleOf(thinkingArrow).transform).toBe(styleOf(arrow).transform)
+  })
+
+  test('bounds long summaries by text space and keeps the trailing edge aligned', async () => {
+    const screen = await render(
+      <div style={{ width: 480, fontFamily: 'monospace' }}>
+        <ToolCall name={'长工具名称'.repeat(20)} status="running" summary={'长摘要'.repeat(30)}>
+          详情
+        </ToolCall>
+        <ToolCall name="短名称" status="completed" summary="完成" />
+        <ToolCall name="无摘要" status="pending" />
+      </div>,
+    )
+    const root = getRoot(screen)
+    const name = root.querySelector('.matthew-tool-call__name')!
+    const summary = root.querySelector('.matthew-tool-call__summary')!
+    const available = root.querySelector('.matthew-tool-call__text')!.getBoundingClientRect().width - 10
+    expect(summary.getBoundingClientRect().width).toBeCloseTo(available * 0.4, 1)
+    expect(name.scrollWidth).toBeGreaterThan(name.clientWidth)
+    expect(summary.scrollWidth).toBeGreaterThan(summary.clientWidth)
+    expect(root.querySelector('.matthew-tool-call__text')!.getBoundingClientRect().right)
+      .toBeCloseTo(summary.getBoundingClientRect().right, 1)
+    expect(root.scrollWidth).toBe(root.clientWidth)
+    const row = screen.container.querySelectorAll('.matthew-tool-call')[1]
+    const rowSummary = row.querySelector('.matthew-tool-call__summary')!
+    expect(row.getBoundingClientRect().right - rowSummary.getBoundingClientRect().right).toBeCloseTo(12, 1)
+    expect(screen.container.querySelectorAll('.matthew-tool-call')[2].querySelector('.matthew-tool-call__summary')).toBeNull()
+  })
+
+  test('responds to container width and restores summaries without remounting', async () => {
+    const view = (width: number) => (
+      <div style={{ width }}>
+        <ToolCall name="窄容器工具" status="running" summary="执行中">详情</ToolCall>
+      </div>
+    )
+    const screen = await render(view(300))
+    const root = getRoot(screen)
+    const summary = root.querySelector('.matthew-tool-call__summary')!
+    for (const width of [300, 320]) {
+      await screen.rerender(view(width))
+      expect(root.getBoundingClientRect().width).toBe(width)
+      expect(styleOf(summary).clipPath).toBe('inset(50%)')
+      expect(styleOf(summary).position).toBe('absolute')
+      expect(summary.textContent).toBe('执行中')
+      expect(screen.getByRole('button', { name: '窄容器工具 执行中' }).element()).not.toBeNull()
+      expect(root.scrollWidth).toBe(root.clientWidth)
+    }
+    await screen.rerender(view(321))
+    expect(getRoot(screen)).toBe(root)
+    expect(styleOf(summary).position).toBe('static')
+    expect(styleOf(summary).clipPath).toBe('none')
+    expect(summary.getBoundingClientRect().width).toBeGreaterThan(1)
+  })
+
+  test('does not collapse when the query container is a flex item', async () => {
+    const screen = await render(
+      <div style={{ display: 'flex', width: 480 }}>
+        <ToolCall name="直接作为 flex 子项" status="running" summary="执行中">详情</ToolCall>
+      </div>,
+    )
+    expect(getRoot(screen).getBoundingClientRect().width).toBe(480)
+    expect(styleOf(getRoot(screen).querySelector('.matthew-tool-call__summary')!).clipPath).toBe('none')
   })
 
   test('renders five distinct status shapes with contract default colors', async () => {

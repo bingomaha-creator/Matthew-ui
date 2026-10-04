@@ -40,6 +40,9 @@ export type {
   TaskStatus,
 } from './components/TaskList'
 
+export { Select } from './components/Select'
+export type { SelectOption, SelectProps } from './components/Select'
+
 export {
   createTokens,
   darkTheme,

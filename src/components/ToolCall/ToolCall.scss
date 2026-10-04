@@ -12,24 +12,29 @@
 }
 
 .matthew-tool-call {
-  // 根节点透明：无完整边框、背景和阴影，比 Thinking 更小更浅（TC-V01）。
+  // 根节点透明；使用命名容器避免被详情中的其他查询容器影响（TC-V06）。
+  min-width: 0;
+  box-sizing: border-box;
+  width: 100%;
+  container: matthew-tool-call / inline-size;
   color: var(--matthew-ui-color-text);
   font: inherit;
 
   &__header {
     display: flex;
     align-items: center;
-    gap: 0.4375rem;
+    gap: 0.625rem;
     box-sizing: border-box;
     width: 100%;
-    min-height: var(--matthew-ui-tool-call-header-min-height, var(--matthew-ui-control-height-sm));
-    padding: 0.3125rem 0.5rem;
+    min-height: var(--matthew-ui-tool-call-header-min-height, var(--matthew-ui-control-height-md));
+    padding: 0.5rem 0.75rem;
     border: none;
     border-radius: var(--matthew-ui-tool-call-radius, var(--matthew-ui-radius-md));
     background: transparent;
     color: var(--matthew-ui-tool-call-name-color, var(--matthew-ui-color-text));
     font: inherit;
-    font-size: var(--matthew-ui-font-size-sm);
+    font-size: var(--matthew-ui-font-size-md);
+    font-weight: 500;
     text-align: left;
   }
 
@@ -50,8 +55,8 @@
     flex: none;
     align-items: center;
     justify-content: center;
-    width: 0.625rem;
-    height: 0.625rem;
+    width: 0.75rem;
+    height: 0.75rem;
 
     svg {
       display: block;
@@ -94,9 +99,19 @@
     background: var(--matthew-ui-tool-call-stopped-color, var(--matthew-ui-color-text-muted));
   }
 
+  // 名称与摘要共享文本空间，40% 上限不包含两侧固定图形（TC-V01）。
+  &__text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
   &__name {
     overflow: hidden;
     flex: 1;
+    min-width: 0;
     font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -104,9 +119,12 @@
 
   &__summary {
     overflow: hidden;
-    flex: 1;
-    // 摘要默认 12px、弱化颜色，与名称同一行；细颗粒值不开放为 Token（TC-V01）。
-    font-size: 0.75rem;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: calc((100% - 0.625rem) * 0.4);
+    font-size: var(--matthew-ui-font-size-md);
+    font-weight: 400;
+    text-align: right;
     color: var(--matthew-ui-tool-call-summary-color, var(--matthew-ui-color-text-muted));
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -116,15 +134,15 @@
     flex: none;
     width: 0.5rem;
     height: 0.5rem;
-    border-top: 1.5px solid currentColor;
     border-right: 1.5px solid currentColor;
-    // 默认指向右方；展开后旋转到下方（45deg + 90deg）。
+    border-bottom: 1.5px solid currentColor;
+    // 默认朝下，展开后朝上，与 Thinking 一致。
     transform: rotate(45deg);
     transition: transform var(--matthew-ui-duration-fast) ease;
   }
 
   &__header[aria-expanded='true'] &__arrow {
-    transform: rotate(135deg);
+    transform: rotate(225deg);
   }
 
   // 当前状态文案以视觉隐藏文本加入可访问名称（TC-B05）。
@@ -161,9 +179,9 @@
   }
 }
 
-// 320px 窄宽下优先保留名称、状态与展开能力；摘要视觉隐藏但保留在
+// 组件宽度 ≤320px 时优先保留名称、状态与展开能力；摘要视觉隐藏但保留在
 // 可访问名称中，不用 display:none 意外丢失辅助技术文本（TC-V06）。
-@media (max-width: 320px) {
+@container matthew-tool-call (max-width: 320px) {
   .matthew-tool-call__summary {
     position: absolute;
     overflow: hidden;

@@ -14,6 +14,7 @@ import { autoCompleteTokensToCssVars } from './autoCompleteComponentTokens'
 import { thinkingTokensToCssVars } from './thinkingComponentTokens'
 import { toolCallTokensToCssVars } from './toolCallComponentTokens'
 import { taskListTokensToCssVars } from './taskListComponentTokens'
+import { selectTokensToCssVars } from './selectComponentTokens'
 
 export interface ThemeProviderProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
@@ -50,6 +51,7 @@ function mergeThemeConfig(
 ): MatthewThemeConfig {
   return {
     components: {
+      Select: mergeDefinedFields(parentTheme?.components?.Select, theme?.components?.Select),
       // 每个组件分别合并：子级只改一种组件不能丢失其他组件配置。
       AutoComplete: mergeDefinedFields(
         parentTheme?.components?.AutoComplete,
@@ -100,6 +102,7 @@ export function ThemeProvider({
     ...thinkingTokensToCssVars(mergedTheme.components?.Thinking),
     ...toolCallTokensToCssVars(mergedTheme.components?.ToolCall),
     ...taskListTokensToCssVars(mergedTheme.components?.TaskList),
+    ...selectTokensToCssVars(mergedTheme.components?.Select),
   }
 
   // 只覆盖配置实际输出的变量；无配置时不写组件默认值，让 CSS 继承继续工作。

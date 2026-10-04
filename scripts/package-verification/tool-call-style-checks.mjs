@@ -71,8 +71,8 @@ export async function checkToolCallBrowserStyles({ packageRoot, consumerDirector
         'reduced motion stops the arrow transition')
     } finally { await reducedPage.close() }
 
-    // 320px 窄宽下摘要视觉隐藏但保留在可访问名称中（TC-V06）。
-    const narrowPage = await browser.newPage({ viewport: { width: 320, height: 640 } })
+    // 宽视口中的窄容器：验证响应式依据组件宽度，而非视口（TC-V06）。
+    const narrowPage = await browser.newPage({ viewport: { width: 1280, height: 900 } })
     narrowPage.setDefaultTimeout(10_000)
     try {
       await narrowPage.route('http://matthew-ui.test/**', route => {
@@ -85,17 +85,36 @@ export async function checkToolCallBrowserStyles({ packageRoot, consumerDirector
       for (const file of ['dist/tokens.css', 'dist/tool-call/style.css']) {
         await narrowPage.addStyleTag({ content: await readFile(join(packageRoot, file), 'utf8') || '\n' })
       }
-      const summary = narrowPage.locator('[data-testid="tool-call-ref"] .matthew-tool-call__summary')
-      await summary.waitFor({ state: 'attached' })
-      const narrowSummary = await summary.evaluate(el => {
-        const s = getComputedStyle(el)
-        return { position: s.position, clipPath: s.clipPath, width: s.width }
-      })
-      assert.deepEqual(narrowSummary, {
-        position: 'absolute', clipPath: 'inset(50%)', width: '1px',
-      }, 'narrow viewport visually hides the summary without display:none')
-      const header = narrowPage.getByRole('button', { name: /正在执行…/ })
-      assert.ok(await header.isVisible(), 'narrow viewport keeps the summary in the accessible name')
+      for (const width of [300, 320, 321, 480]) {
+        const root = narrowPage.locator(`[data-testid="container-${width}"]`)
+        assert.equal(await root.evaluate(el => el.getBoundingClientRect().width), width,
+          'container width stays stable')
+        const summary = root.locator('.matthew-tool-call__summary')
+        if (width <= 320) {
+          await expectStyles(summary, { position: 'absolute', clipPath: 'inset(50%)', width: '1px' },
+            'narrow container visually hides the summary without display:none')
+        } else {
+          await expectStyles(summary, { position: 'static', clipPath: 'none' },
+            'wide container restores the summary')
+          const dimensions = await root.evaluate(el => {
+            const text = el.querySelector('.matthew-tool-call__text')
+            const summary = el.querySelector('.matthew-tool-call__summary')
+            return {
+              available: text.getBoundingClientRect().width - 10,
+              summary: summary.getBoundingClientRect().width,
+              trailingSpace: text.getBoundingClientRect().right - summary.getBoundingClientRect().right,
+            }
+          })
+          assert.ok(Math.abs(dimensions.summary - dimensions.available * 0.4) < 1,
+            'wide container limits summary to 40% of text space')
+          assert.ok(Math.abs(dimensions.trailingSpace) < 1, 'wide container aligns summary before arrow')
+        }
+        assert.ok((await summary.textContent()).length > 0, 'container keeps summary text in DOM')
+        assert.ok(await root.getByRole('button', { name: /未完成，结果未确认/ }).isVisible(),
+          'container keeps summary in accessible name')
+        assert.equal(await root.evaluate(el => el.scrollWidth - el.clientWidth), 0,
+          'container does not overflow horizontally')
+      }
     } finally { await narrowPage.close() }
   } finally { await browser.close() }
 }
@@ -117,13 +136,21 @@ async function inspect(page, mode) {
   // 可访问名称由 name 与可选 summary 组成（TC-B05），用完整名称匹配。
   const defaultHeader = header('读取项目文件 正在执行…')
   await expectStyles(defaultHeader, {
-    minHeight: '32px', fontSize: '13px', borderRadius: '8px',
+    minHeight: '40px', fontSize: '14px', fontWeight: '500', padding: '8px 12px', gap: '10px', borderRadius: '8px',
     color: 'rgb(15, 23, 42)', backgroundColor: 'rgba(0, 0, 0, 0)',
   }, mode + ' default header')
   assert.equal(await defaultRoot.evaluate(el => getComputedStyle(el).backgroundColor),
     'rgba(0, 0, 0, 0)', mode + ' default root stays transparent')
   const summary = defaultRoot.locator('.matthew-tool-call__summary')
-  await expectStyles(summary, { fontSize: '12px', color: 'rgb(100, 116, 139)' }, mode + ' default summary')
+  await expectStyles(summary, { fontSize: '14px', fontWeight: '400', textAlign: 'right',
+    color: 'rgb(100, 116, 139)' }, mode + ' default summary')
+  await expectStyles(statusOf('status-running'), { width: '12px', height: '12px' }, mode + ' status slot')
+  const arrow = defaultRoot.locator('.matthew-tool-call__arrow')
+  await arrow.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
+  // Chromium 在当前 DPR 下将 CSS 1.5px 边框计算为 1px。
+  await expectStyles(arrow, { width: '8px', height: '8px', borderBottomWidth: '1px',
+    borderTopWidth: '0px', transform: 'matrix(0.707107, 0.707107, -0.707107, 0.707107, 0, 0)' },
+  mode + ' collapsed arrow points down')
 
   const contentId = await defaultHeader.getAttribute('aria-controls')
   const detail = page.locator('[id="' + contentId + '"]')
@@ -133,6 +160,9 @@ async function inspect(page, mode) {
 
   // 点击展开 + hover 背景。
   await defaultHeader.click()
+  await arrow.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
+  await expectStyles(arrow, { transform: 'matrix(-0.707107, -0.707107, 0.707107, -0.707107, 0, 0)' },
+    mode + ' expanded arrow points up')
   assert.ok(await detail.isVisible(), mode + ' click expands the detail')
   await defaultHeader.hover()
   await expectStyles(defaultHeader, { backgroundColor: 'rgb(241, 245, 249)' }, mode + ' default header hover')

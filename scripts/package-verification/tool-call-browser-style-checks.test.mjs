@@ -42,9 +42,17 @@ const regressions = [
   ['ToolCall reduced-motion suppression', ['dist/tool-call/style.css'],
     '.matthew-tool-call__ring{animation:matthew-tool-call-ring-spin 0.9s linear infinite!important}',
     /reduced motion stops the ring rotation/i],
-  ['ToolCall narrow-viewport summary', ['dist/tool-call/style.css'],
-    '@media (max-width: 320px){.matthew-tool-call__summary{position:static;clip-path:none;width:auto;height:auto;}}',
-    /narrow viewport/i],
+  ['ToolCall narrow-container summary', ['dist/tool-call/style.css'],
+    '@container matthew-tool-call (max-width: 320px){.matthew-tool-call__summary{position:static;clip-path:none;width:auto;height:auto;}}',
+    /narrow container/i],
+  ['ToolCall summary text-space limit', ['dist/tool-call/style.css'],
+    '[data-tool-call-container="480"] .matthew-tool-call__summary{max-width:80%}',
+    /40% of text space/i],
+  ['ToolCall summary container scoping', ['dist/tool-call/style.css'],
+    '[data-tool-call-container="300"] .matthew-tool-call__summary{display:none!important}',
+    /container keeps summary in accessible name/i],
+  ['ToolCall arrow direction', ['dist/tool-call/style.css'],
+    '.matthew-tool-call__arrow{transform:rotate(135deg)!important}', /collapsed arrow/i],
 ]
 for (const [name, files, brokenCss, error] of regressions) {
   test('browser rejects ' + name, async t => {

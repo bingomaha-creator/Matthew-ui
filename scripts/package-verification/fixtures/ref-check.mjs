@@ -39,6 +39,7 @@ const {
   darkTheme,
   LinkButton,
   Menu,
+  Select,
   TaskList,
   ThemeProvider,
   Thinking,
@@ -52,6 +53,7 @@ const inputRef = createRef()
 const thinkingRef = createRef()
 const toolCallRef = createRef()
 const taskListRef = createRef()
+const selectRef = createRef()
 const container = document.querySelector('#root')
 const root = createRoot(container)
 
@@ -97,6 +99,10 @@ flushSync(() => {
         'data-ref-target': 'task-list',
         ref: taskListRef,
       }),
+      createElement(Select, {
+        ref: selectRef, value: '', options: [{ value: '', label: 'All' }],
+        onValueChange: () => {}, 'aria-label': 'Select ref',
+      }),
       createElement(
         Menu,
         { 'aria-label': 'Navigation' },
@@ -122,6 +128,8 @@ assert.strictEqual(
 )
 assert.ok(toolCallRef.current.isConnected)
 assert.ok(taskListRef.current instanceof window.HTMLDivElement)
+assert.ok(selectRef.current instanceof window.HTMLButtonElement)
+assert.equal(selectRef.current.getAttribute('role'), 'combobox')
 assert.strictEqual(
   taskListRef.current,
   container.querySelector('[data-ref-target="task-list"]'),

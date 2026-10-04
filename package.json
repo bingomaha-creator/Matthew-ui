@@ -72,6 +72,12 @@
       "require": "./dist/task-list/index.cjs"
     },
     "./task-list/style.css": "./dist/task-list/style.css",
+    "./select": {
+      "types": "./dist/select/index.d.ts",
+      "import": "./dist/select/index.js",
+      "require": "./dist/select/index.cjs"
+    },
+    "./select/style.css": "./dist/select/style.css",
     "./theme": {
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.js",

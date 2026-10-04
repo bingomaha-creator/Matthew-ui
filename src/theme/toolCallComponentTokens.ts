@@ -26,7 +26,7 @@ export interface ToolCallComponentTokens {
   stoppedColor?: string
   /** 标题行圆角；radiusMd。数字设计单位（px），输出 rem；允许0。 */
   borderRadius?: number
-  /** 标题行最小高度；controlHeightSm。必须大于0。 */
+  /** 标题行最小高度；controlHeightMd。必须大于0。 */
   headerMinHeight?: number
 }
 

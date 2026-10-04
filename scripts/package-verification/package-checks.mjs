@@ -34,6 +34,13 @@ const requiredPackageFiles = [
   'dist/menu/style.css.map',
   'dist/styles.css',
   'dist/styles.css.map',
+  'dist/select/index.cjs',
+  'dist/select/index.cjs.map',
+  'dist/select/index.d.ts',
+  'dist/select/index.js',
+  'dist/select/index.js.map',
+  'dist/select/style.css',
+  'dist/select/style.css.map',
   'dist/thinking/index.cjs',
   'dist/thinking/index.cjs.map',
   'dist/thinking/index.d.ts',
@@ -86,6 +93,9 @@ const expectedPublicExports = [
   'MenuMode',
   'MenuProps',
   'MenuSubMenuProps',
+  'Select',
+  'SelectOption',
+  'SelectProps',
   'TaskList',
   'TaskListItem',
   'TaskListProps',
@@ -207,6 +217,8 @@ const assertExports = (manifest) => {
     './button/style.css',
     './menu',
     './menu/style.css',
+    './select',
+    './select/style.css',
     './styles.css',
     './task-list',
     './task-list/style.css',
@@ -262,6 +274,12 @@ const assertExports = (manifest) => {
     import: './dist/theme/index.js',
     require: './dist/theme/index.cjs',
   })
+  assert.deepEqual(manifest.exports['./select'], {
+    types: './dist/select/index.d.ts',
+    import: './dist/select/index.js',
+    require: './dist/select/index.cjs',
+  })
+  assert.equal(manifest.exports['./select/style.css'], './dist/select/style.css')
   assert.equal(
     manifest.exports['./auto-complete/style.css'],
     './dist/auto-complete/style.css',
@@ -443,6 +461,7 @@ export async function checkPackage({ packedRoot, packedManifest, packageFiles, c
       'Button',
       'Menu',
       'AutoComplete',
+      'Select',
       'ThemeProvider',
     ]) {
       assert.match(

@@ -166,16 +166,18 @@ function ToolCallImpl(
       <span className="matthew-tool-call__status" aria-hidden="true">
         <StatusIndicator status={status} />
       </span>
-      <span className="matthew-tool-call__name">{name}</span>
-      {summary !== undefined && (
-        <span className="matthew-tool-call__summary">{summary}</span>
-      )}
+      <span className="matthew-tool-call__text">
+        <span className="matthew-tool-call__name">{name}</span>
+        {summary !== undefined && (
+          <span className="matthew-tool-call__summary">{summary}</span>
+        )}
+      </span>
       {statusLabels && (
         // 当前状态文案以视觉隐藏文本加入可访问名称；图形本身从辅助技术树隐藏（TC-B05）。
         <span className="matthew-tool-call__sr-status">{statusLabels[status]}</span>
       )}
       {hasDetails && (
-        // 默认指向右方，展开后旋转到下方；同一组件内保持一致（TC-V01）。
+        // 与 Thinking 一致：收起朝下、展开朝上（TC-V01）。
         <span className="matthew-tool-call__arrow" aria-hidden="true" />
       )}
     </>

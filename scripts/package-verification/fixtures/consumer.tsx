@@ -7,6 +7,7 @@ import {
   lightTheme,
   LinkButton,
   Menu,
+  Select,
   TaskList,
   ThemeProvider,
   Thinking,
@@ -18,6 +19,8 @@ import { AutoComplete as SubpathAutoComplete } from 'matthew-ui/auto-complete'
 import { Thinking as SubpathThinking } from 'matthew-ui/thinking'
 import { ToolCall as SubpathToolCall } from 'matthew-ui/tool-call'
 import { TaskList as SubpathTaskList } from 'matthew-ui/task-list'
+import { Select as SubpathSelect } from 'matthew-ui/select'
+import type { SelectOption, SelectProps } from 'matthew-ui/select'
 import {
   darkTheme as subpathDarkTheme,
   ThemeProvider as SubpathThemeProvider,
@@ -108,6 +111,17 @@ const buttonRef = createRef<HTMLButtonElement>()
 const anchorRef = createRef<HTMLAnchorElement>()
 const inputRef = createRef<HTMLInputElement>()
 const divRef = createRef<HTMLDivElement>()
+const selectOptions: SelectOption[] = [{ value: '', label: 'All' }]
+const selectProps: SelectProps = { value: '', options: selectOptions, onValueChange: value => void value.toUpperCase() }
+const rootSelect = <Select {...selectProps} ref={buttonRef} aria-label="Root Select" />
+const subpathSelect = <SubpathSelect {...selectProps} popupHost={() => divRef.current} />
+// @ts-expect-error Controlled value is required.
+const uncontrolledSelect = <Select options={selectOptions} onValueChange={() => {}} />
+// @ts-expect-error Select forwards to a button, not an input.
+const invalidSelectRef = <Select {...selectProps} ref={inputRef} />
+// @ts-expect-error Dimensions use design px numbers.
+const invalidSelectToken: MatthewThemeConfig = { components: { Select: { optionMinHeight: '36px' } } }
+void [rootSelect, subpathSelect, uncontrolledSelect, invalidSelectRef, invalidSelectToken]
 
 
 const autoCompleteTheme = {

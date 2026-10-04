@@ -129,10 +129,10 @@ export const ComposedWithThinking: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    // 与 Thinking 组合：ToolCall 更小更浅，标题行 32px vs 40px（TC-V07）。
+    // 默认标题栏一致，运行图形与详情层级不同（TC-V07）。
     const toolCallHeader = canvas.getByRole('button', { name: /运行类型检查/ })
     const thinkingHeader = canvas.getByRole('button', { name: /正在检查组件库结构/ })
-    expect(getComputedStyle(toolCallHeader).minHeight).toBe('32px')
+    expect(getComputedStyle(toolCallHeader).minHeight).toBe('40px')
     expect(getComputedStyle(thinkingHeader).minHeight).toBe('40px')
   },
 }
@@ -278,7 +278,7 @@ export const DynamicThemeScopes: Story = {
 
     // 撤销子层：恢复父层配置或默认回退。
     expect(ringColor()).toBe('rgb(255, 0, 0)')
-    expect(headerMinHeight()).toBe('32px')
+    expect(headerMinHeight()).toBe('40px')
 
     await userEvent.click(canvas.getByRole('button', { name: '启用子层配置' }))
     expect(ringColor()).toBe('rgb(0, 255, 0)')
@@ -305,5 +305,31 @@ export const LongNameInNarrowContainer: Story = {
 
     // 长名称单行省略（TC-V01）。
     expect(getComputedStyle(name).textOverflow).toBe('ellipsis')
+    const summary = canvas.getByText(/一段同样比较长的摘要/)
+    expect(getComputedStyle(summary).clipPath).toBe('inset(50%)')
+    expect(canvas.getByRole('button', { name: /一段同样比较长的摘要/ })).toBeVisible()
+  },
+}
+
+export const HeaderConsistency: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '0.75rem', width: '100%', maxWidth: 480 }}>
+      <Thinking title="正在检查组件库结构">执行步骤</Thinking>
+      <ToolCall name="读取项目文件" status="completed" summary="已完成">参数与结果</ToolCall>
+      <ToolCall name="非常长的工具名称用于检验省略与布局稳定" status="stopped" summary="未完成，结果未确认" />
+      <ToolCall name="没有摘要的工具" status="pending" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const headers = canvasElement.querySelectorAll<HTMLElement>(
+      '.matthew-thinking__header, .matthew-tool-call__header',
+    )
+    for (const header of headers) {
+      expect(getComputedStyle(header).minHeight).toBe('40px')
+      expect(getComputedStyle(header).fontSize).toBe('14px')
+    }
+    const summary = within(canvasElement).getByText('已完成')
+    expect(getComputedStyle(summary).fontWeight).toBe('400')
+    expect(getComputedStyle(summary).textAlign).toBe('right')
   },
 }

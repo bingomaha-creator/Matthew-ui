@@ -9,6 +9,7 @@ export default {
     thinking: 'src/components/Thinking/index.ts',
     'tool-call': 'src/components/ToolCall/index.ts',
     'task-list': 'src/components/TaskList/index.ts',
+    select: 'src/components/Select/index.ts',
     theme: 'src/theme/index.ts',
   },
   output: {

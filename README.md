@@ -7,6 +7,9 @@
 
 Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu、AutoComplete，以及 agent 原生的 Thinking、ToolCall 和 TaskList 组件。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
 
+当前源码新增 Select；该组件尚未发布，npm 的 `0.3.0` 不包含 Select。下面的 Select
+示例用于本地构建或后续发布版本，不应直接用于已安装的 `0.3.0`。
+
 - [npm 包：`matthew-ui`](https://www.npmjs.com/package/matthew-ui)
 - [在线 Storybook](https://bingomaha-creator.github.io/Matthew-ui/)
 
@@ -99,8 +102,9 @@ ThemeProvider 会渲染一个局部 `div` wrapper，并把完整 Token 序列化
 ```
 
 `theme.seed` 会重新派生对应颜色或尺寸家族；`theme.tokens` 是最高优先级的最终精确
-覆盖，不会反向重算其他 Token。第一版局部主题不保证覆盖挂载到 wrapper 外部的 Portal
-内容；当前组件不使用 Portal。
+覆盖，不会反向重算其他 Token。局部 CSS 继承本身不覆盖 wrapper 外部的 Portal。
+当前源码中的 Select 会单独桥接触发器来源域的公开主题变量与字体，其他组件不使用
+Portal；Provider 不为任意外部 Portal 自动提供这项能力。
 
 ### Button 组件定制
 
@@ -404,8 +408,15 @@ export function AgentToolCalls() {
 | headerMinHeight | number > 0 | --matthew-ui-tool-call-header-min-height |
 
 - 数字是设计 px，以16为基准转换为 rem；类型、有限数与范围校验规则与其他组件 Token
-  一致；圆角可为 0，标题行最小高度必须大于 0。默认标题行最小高度 32px（controlHeightSm）、
-  名称 13px、摘要 12px，跟随全局 Token，显式组件字段优先。
+  一致；圆角可为 0，标题行最小高度必须大于 0。当前源码的默认标题行最小高度为
+  40px（controlHeightMd），名称与摘要 14px（fontSizeMd），名称字重 500、摘要 400，
+  字体族继承宿主。标题 padding 8px/12px、间距 10px、状态占位 12px、收起朝下／
+  展开朝上的箭头与 Thinking 一致；显式组件字段优先。
+- 摘要靠右排列在箭头前，最多占可分配文本宽度的 40%，长名称与长摘要单行省略。
+  组件宽度 ≤320px 时通过容器查询视觉隐藏摘要，仍保留辅助技术文本；宽视口中的
+  窄容器同样生效。不支持容器查询的浏览器继续展示摘要并省略长文本。
+- 上述标题栏是 v0.3.0 之后的视觉调整，尚未发布；已发布 v0.3.0 使用 32px 标题行、
+  13px 名称、12px 摘要以及右／下箭头。公开 props、详情布局和展开行为保持一致。
 - 颜色字段只接受 CSS 字符串，彼此不派生；未提供的字段继续读取当前全局 Token：
   名称 colorText，摘要/详情/pending/stopped colorTextMuted，running colorPrimary，
   completed colorPrimaryActive，error colorDanger，分隔线 colorBorder，hover colorSurfaceHover。
@@ -488,6 +499,64 @@ export function AgentPlan() {
 空列表、五种状态图形与并行 running、动态增删重排、与 Thinking/ToolCall 的
 三层组合、亮暗主题、15 字段精确覆盖、动态启用/撤销主题作用域、320px 窄宽
 摘要隐藏与 reduced-motion 降级效果。
+
+### Select 组件定制（当前源码，尚未发布）
+
+```tsx
+import { Select } from 'matthew-ui/select'
+import { ThemeProvider } from 'matthew-ui/theme'
+import 'matthew-ui/tokens.css'
+import 'matthew-ui/select/style.css'
+
+export function CategoryFilter() {
+  return (
+    <ThemeProvider theme={{ components: { Select: {
+      triggerMinHeight: 48, optionSelectedColor: '#166534', borderRadius: 12,
+    } } }}>
+      <Select value="" onValueChange={value => console.log(value)}
+        options={[{ value: '', label: '全部分类' }, { value: 'docs', label: '文档' }]}
+        aria-label="分类" />
+    </ThemeProvider>
+  )
+}
+```
+
+`theme.components.Select` 的 16 个字段均可选；变量以 `--matthew-ui-select-` 为前缀：
+
+| 字段 | 类型 | CSS 变量后缀 | 默认回退 |
+| --- | --- | --- | --- |
+| fontSize | number > 0 | font-size | fontSizeMd |
+| triggerBackground | string | trigger-background | colorSurface |
+| triggerColor | string | trigger-color | colorText |
+| placeholderColor | string | placeholder-color | colorTextMuted |
+| borderColor | string | border-color | colorBorder |
+| triggerHoverBorderColor | string | trigger-hover-border-color | colorPrimary |
+| triggerMinHeight | number > 0 | trigger-min-height | controlHeightMd |
+| borderRadius | number ≥ 0 | radius | radiusMd |
+| triggerPaddingBlock | number ≥ 0 | trigger-padding-block | 8px / 0.5rem |
+| triggerPaddingInline | number ≥ 0 | trigger-padding-inline | 12px / 0.75rem |
+| optionColor | string | option-color | colorText |
+| optionActiveBackground | string | option-active-background | colorSurfaceHover |
+| optionSelectedColor | string | option-selected-color | colorPrimaryActive |
+| optionMinHeight | number > 0 | option-min-height | 36px / 2.25rem |
+| popupBackground | string | popup-background | colorSurface |
+| popupShadow | string | popup-shadow | shadowOverlay |
+
+- 字号用于触发器与选项；圆角、普通边框颜色用于触发器与弹层。hover 边框只用于
+  触发器悬停／展开态；popup 背景和阴影独立，不改变触发器。
+- 活动项用背景提示，已选项用文字颜色与对勾，两者可同时存在。选中前景默认读取
+  colorPrimaryActive，与 Menu 一致，避免暗色主色文字对比度不足。
+- 禁用触发器背景／文字优先使用全局 colorSurfaceHover/colorTextMuted；禁用选项
+  文字与对勾优先使用 colorTextMuted。普通／选中颜色覆盖不改变禁用语义；尺寸、
+  普通边框定制仍保留，不开放独立 disabled Token。
+- 数字是设计 px，以16为基准转 rem；类型、有限数、正尺寸、非负圆角／padding 与
+  string 校验沿用现有组件。最小高度允许内容撑高，padding 不随高度自动派生。
+- 只输出显式字段；空对象和 undefined 继承父值，null 字段进入校验。亮暗切换保留
+  定制，撤销子层后恢复父级或默认回退；不新增全局 Token 或包级组件 Token 类型导出。
+- Portal 桥接来源域变量，包括祖先 CSS 和触发器 style，并跟随主题更新。
+  className/style 位于触发器；祖先后代选择器不能跨 Portal 命中弹层。
+- 不开放宽度、层级、坐标、箭头角度或动画速度 Token。普通 CSS 管布局，
+  自定义模态场景通过 popupHost 提供语义范围内的宿主。
 
 ## 组件
 
@@ -669,6 +738,38 @@ export function AgentPlan() {
 以视觉隐藏文本加入条目可访问内容。条目是只读 `li`，模块不内置编辑、重试、
 取消或行内操作。
 
+### Select（当前源码，尚未发布）
+
+```tsx
+import { useState } from 'react'
+import { Select } from 'matthew-ui'
+
+export function ThemeChoice() {
+  const [value, setValue] = useState('')
+  return <Select value={value} onValueChange={setValue} aria-label="主题"
+    placeholder="请选择主题" options={[
+      { value: '', label: '跟随系统' }, { value: 'light', label: '亮色' },
+      { value: 'dark', label: '暗色' }, { value: 'contrast', label: '高对比度', disabled: true },
+    ]} />
+}
+```
+
+第一版只做受控单选、不可编辑选择：value/onValueChange/options 必填，每项 value
+唯一、label 为字符串。空字符串是合法值；非法 value 显示 placeholder，不自动选中
+或纠正。相同值确认只关闭，不重复回调；调用方不更新 value 时展示不变。
+空 options 自动禁用、不打开弹层；全禁用 options 仍可展开查看。动态选项按 value
+维护身份，新增／删除／重排不提交选择。
+
+触发器为 type="button" 的 combobox，ref 指向 HTMLButtonElement。title、
+className/style、data 属性和 aria-label/aria-labelledby 可透传。字符前缀定位不筛选
+列表，不提供搜索、多选或非受控 value。方向键／Home/End 导航，Enter/Space 确认；
+Escape、Tab、外部点击关闭但不提交，外部点击不抢焦点；关闭态 Escape 留给父级。
+
+默认 Portal 到 body，跟随滚动／resize、向上翻转和限高。模态 Dialog／侧栏使用
+`popupHost={() => dialogRef.current}` 指定内部宿主；调用方须确保打开时 ref 已有效。
+首个 Escape 仅关闭 Select，下一次留给原生 Dialog；默认关闭时不渲染 listbox。
+name/form 属性不代表支持原生 select 的表单值提交、校验或重置，由业务处理。
+
 ## 公开入口
 
 | 入口 | 内容 |
@@ -680,6 +781,7 @@ export function AgentPlan() {
 | `matthew-ui/thinking` | Thinking 及对应类型 |
 | `matthew-ui/tool-call` | ToolCall 及对应类型 |
 | `matthew-ui/task-list` | TaskList/TaskStatus/TaskListItem 及对应类型 |
+| `matthew-ui/select` | Select/SelectOption/SelectProps（当前源码，尚未发布） |
 | `matthew-ui/theme` | ThemeProvider、主题预设、Token API 及对应类型 |
 | `matthew-ui/tokens.css` | 默认亮色 `:root` Token |
 | `matthew-ui/button/style.css` | Button/LinkButton 样式 |
@@ -688,22 +790,24 @@ export function AgentPlan() {
 | `matthew-ui/thinking/style.css` | Thinking 样式 |
 | `matthew-ui/tool-call/style.css` | ToolCall 样式 |
 | `matthew-ui/task-list/style.css` | TaskList 样式 |
+| `matthew-ui/select/style.css` | Select 样式（当前源码，尚未发布） |
 | `matthew-ui/styles.css` | Token 与全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
 
 ## 质量验证
 
-- 344 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
-- 57 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
-- 66 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
+- 368 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
+- 68 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
+- 75 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
 - 真实 `npm pack` tarball 会分别安装到 React 18.2 与 React 19 临时消费端，验证 ESM、CommonJS、类型、CSS、DOM ref、公开入口边界和 Vite Tree Shaking。
 - Chromium 验证无 Provider 的默认 Token 回退，以及按需/全量 CSS 的 Button/LinkButton 定制尺寸、颜色、真实 hover/active 与作用域隔离。
 - Menu还经过真实挂载，验证两种CSS模式的默认/定制尺寸、选中悬停、父标题和浮层；不以SSR静态标记代替子菜单注册与展开。
 - AutoComplete同样从真实安装包挂载，验证两种CSS模式的默认/定制输入、异步加载、候选高亮与回填、禁用/只读及暗色浮层；不以变量输出代替最终样式。
 - Thinking 从真实安装包验证默认/定制样式、四种状态、明暗与嵌套主题、展开交互及 reduced-motion 降级。
-- ToolCall 从真实安装包验证默认/定制样式、五种状态图形与颜色、无详情状态行、明暗与嵌套主题、320px 窄宽摘要隐藏及 reduced-motion 圆环降级。
+- ToolCall 从真实安装包验证默认/定制标题栏、五种状态图形与颜色、无详情状态行、明暗与嵌套主题、宽视口中的窄容器摘要隐藏与恢复、40% 文本空间上限及 reduced-motion 圆环降级。
 - TaskList 从真实安装包验证默认/定制面板样式、宽度约束、五种状态图形与连接线、明暗与嵌套主题、折叠挂载、320px 窄宽摘要隐藏及 reduced-motion 圆环降级。
+- Select 从真实安装包验证两种 CSS 模式、16 字段定制、来源域 Portal 主题桥接、动态撤销、滚动与尺寸跟随、边界翻转、窄视口、变换宿主与原生 Dialog 的两次 Escape。
 
 ## 本地开发
 

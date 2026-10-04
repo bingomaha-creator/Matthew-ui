@@ -29,6 +29,12 @@ function toolCall(testId, props, ...children) {
 }
 
 createRoot(document.getElementById('app')).render(h('main', null,
+  ...[300, 320, 321, 480].map(width => h('section', {
+    key: width, 'data-tool-call-container': String(width), style: { width },
+  }, toolCall(`container-${width}`, {
+    name: '窄容器工具名称'.repeat(12), status: 'running',
+    summary: '未完成，结果未确认'.repeat(12),
+  }, '容器详情'))),
   h('section', { 'data-tool-call-default': '', style: { minHeight: '160px' } },
     h(RefToolCall, { 'data-testid': 'tool-call-ref', name: '读取项目文件', status: 'running', summary: '正在执行…' }, '读取项目结构'),
     toolCall('status-pending', { name: '排队', status: 'pending' }, '内容'),
