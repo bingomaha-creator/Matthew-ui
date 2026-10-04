@@ -2,6 +2,7 @@ import { createRef } from 'react'
 import {
   AutoComplete,
   Button,
+  Dialog,
   createTokens,
   darkTheme,
   lightTheme,
@@ -21,6 +22,8 @@ import { ToolCall as SubpathToolCall } from 'matthew-ui/tool-call'
 import { TaskList as SubpathTaskList } from 'matthew-ui/task-list'
 import { Select as SubpathSelect } from 'matthew-ui/select'
 import type { SelectOption, SelectProps } from 'matthew-ui/select'
+import { Dialog as SubpathDialog } from 'matthew-ui/dialog'
+import type { DialogProps } from 'matthew-ui/dialog'
 import {
   darkTheme as subpathDarkTheme,
   ThemeProvider as SubpathThemeProvider,
@@ -112,6 +115,15 @@ const anchorRef = createRef<HTMLAnchorElement>()
 const inputRef = createRef<HTMLInputElement>()
 const divRef = createRef<HTMLDivElement>()
 const selectOptions: SelectOption[] = [{ value: '', label: 'All' }]
+const dialogRef = createRef<HTMLDialogElement>()
+const dialogProps: DialogProps = { open: false, onOpenChange: open => void open, title: 'Dialog', closeLabel: 'Close', children: 'Content' }
+const rootDialog = <Dialog {...dialogProps} ref={dialogRef} />
+const subpathDialog = <SubpathDialog {...dialogProps} dismissible={false} footer={<SubpathButton>Save</SubpathButton>} initialFocus={() => dialogRef.current?.querySelector('button') ?? null} />
+// @ts-expect-error No uncontrolled Dialog mode.
+const invalidDialog = <Dialog title="Dialog" closeLabel="Close" onOpenChange={() => {}}>Content</Dialog>
+// @ts-expect-error No public width Token.
+const invalidDialogToken: MatthewThemeConfig = { components: { Dialog: { width: 600 } } }
+void [rootDialog, subpathDialog, invalidDialog, invalidDialogToken]
 const selectProps: SelectProps = { value: '', options: selectOptions, onValueChange: value => void value.toUpperCase() }
 const rootSelect = <Select {...selectProps} ref={buttonRef} aria-label="Root Select" />
 const subpathSelect = <SubpathSelect {...selectProps} popupHost={() => divRef.current} />

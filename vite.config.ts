@@ -32,6 +32,7 @@ export default defineConfig({
           'src/components/TaskList/index.ts',
         ),
         select: resolve(import.meta.dirname, 'src/components/Select/index.ts'),
+        dialog: resolve(import.meta.dirname, 'src/components/Dialog/index.ts'),
         theme: resolve(import.meta.dirname, 'src/theme/index.ts'),
       },
       formats: ['es', 'cjs'],

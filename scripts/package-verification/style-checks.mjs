@@ -10,6 +10,7 @@ export { checkThinkingBrowserStyles } from './thinking-style-checks.mjs'
 export { checkToolCallBrowserStyles } from './tool-call-style-checks.mjs'
 export { checkTaskListBrowserStyles } from './task-list-style-checks.mjs'
 export { checkSelectBrowserStyles } from './select-style-checks.mjs'
+export { checkDialogBrowserStyles } from './dialog-style-checks.mjs'
 
 /**
  * 样式验收使用真实 Chromium，HTML 来自消费端安装的组件。
@@ -148,12 +149,16 @@ export async function checkStyles({
     assert.doesNotMatch(css, /@import/)
     assert.doesNotMatch(
       css,
-      /\.matthew-(?:button|menu|auto-complete|thinking|tool-call|task-list|select)/,
+      /\.matthew-(?:button|menu|auto-complete|thinking|tool-call|task-list|select|dialog)/,
     )
     assert.match(css, /sourceMappingURL=tokens\.css\.map/)
   })
   await check('packed component CSS entries contain only their own style boundary', async () => {
     const componentStyles = [
+      {
+        path: 'dist/dialog/style.css', marker: '.matthew-dialog',
+        forbiddenMarkers: ['.matthew-button', '.matthew-menu', '.matthew-auto-complete', '.matthew-thinking', '.matthew-tool-call', '.matthew-task-list', '.matthew-select'],
+      },
       {
         path: 'dist/select/style.css', marker: '.matthew-select',
         forbiddenMarkers: ['.matthew-button', '.matthew-menu', '.matthew-auto-complete', '.matthew-thinking', '.matthew-tool-call', '.matthew-task-list'],
@@ -195,6 +200,7 @@ export async function checkStyles({
 
       assert.ok(css.includes(componentStyle.marker))
       if (componentStyle.marker !== '.matthew-select') assert.ok(!css.includes('.matthew-select'))
+      if (componentStyle.marker !== '.matthew-dialog') assert.ok(!css.includes('.matthew-dialog'))
       assert.doesNotMatch(css, /:root\s*\{/)
       assert.doesNotMatch(css, /--matthew-ui-[a-z0-9-]+\s*:/)
       assert.doesNotMatch(css, /@import/)
@@ -232,6 +238,7 @@ export async function checkStyles({
       '.matthew-tool-call',
       '.matthew-task-list',
       '.matthew-select',
+      '.matthew-dialog',
     ]) {
       assert.ok(css.includes(selector), `dist/styles.css is missing ${selector}`)
     }

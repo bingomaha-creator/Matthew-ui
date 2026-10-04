@@ -43,6 +43,9 @@ export type {
 export { Select } from './components/Select'
 export type { SelectOption, SelectProps } from './components/Select'
 
+export { Dialog } from './components/Dialog'
+export type { DialogProps } from './components/Dialog'
+
 export {
   createTokens,
   darkTheme,

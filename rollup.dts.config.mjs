@@ -10,6 +10,7 @@ export default {
     'tool-call': 'src/components/ToolCall/index.ts',
     'task-list': 'src/components/TaskList/index.ts',
     select: 'src/components/Select/index.ts',
+    dialog: 'src/components/Dialog/index.ts',
     theme: 'src/theme/index.ts',
   },
   output: {

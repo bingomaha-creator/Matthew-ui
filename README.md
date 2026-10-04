@@ -7,7 +7,7 @@
 
 Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu、AutoComplete，以及 agent 原生的 Thinking、ToolCall 和 TaskList 组件。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
 
-当前源码新增 Select；该组件尚未发布，npm 的 `0.3.0` 不包含 Select。下面的 Select
+当前源码新增 Select 和 Dialog；这两个组件尚未发布，npm 的 `0.3.0` 不包含它们。下面的相关
 示例用于本地构建或后续发布版本，不应直接用于已安装的 `0.3.0`。
 
 - [npm 包：`matthew-ui`](https://www.npmjs.com/package/matthew-ui)
@@ -103,8 +103,8 @@ ThemeProvider 会渲染一个局部 `div` wrapper，并把完整 Token 序列化
 
 `theme.seed` 会重新派生对应颜色或尺寸家族；`theme.tokens` 是最高优先级的最终精确
 覆盖，不会反向重算其他 Token。局部 CSS 继承本身不覆盖 wrapper 外部的 Portal。
-当前源码中的 Select 会单独桥接触发器来源域的公开主题变量与字体，其他组件不使用
-Portal；Provider 不为任意外部 Portal 自动提供这项能力。
+当前源码中的 Select 会单独桥接触发器来源域的公开主题变量与字体。Dialog 使用
+原生 top layer、不 Portal，保留原来的 CSS 继承；Provider 不为任意外部 Portal 自动提供桥接。
 
 ### Button 组件定制
 
@@ -558,6 +558,39 @@ export function CategoryFilter() {
 - 不开放宽度、层级、坐标、箭头角度或动画速度 Token。普通 CSS 管布局，
   自定义模态场景通过 popupHost 提供语义范围内的宿主。
 
+### Dialog 组件定制（当前源码，尚未发布）
+
+`theme.components.Dialog` 的12个字段均可选，变量前缀为 `--matthew-ui-dialog-`：
+
+| 字段 | 类型 | CSS 变量后缀 | 默认回退 |
+| --- | --- | --- | --- |
+| background | string | background | colorSurface |
+| color | string | color | colorText |
+| borderColor | string | border-color | colorBorder |
+| backdropBackground | string | backdrop-background | rgb(15 23 42 / 45%) |
+| titleColor | string | title-color | colorText |
+| closeColor | string | close-color | colorTextMuted |
+| closeHoverBackground | string | close-hover-background | colorSurfaceHover |
+| shadow | string | shadow | shadowOverlay |
+| borderRadius | number ≥0 | radius | radiusMd |
+| titleFontSize | number >0 | title-font-size | fontSizeLg |
+| contentPaddingBlock | number ≥0 | content-padding-block | 20px / 1.25rem |
+| contentPaddingInline | number ≥0 | content-padding-inline | 20px / 1.25rem |
+
+- 数字按设计 px／16转rem，有限数、正尺寸、非负圆角／padding 和 string 校验沿用现有规则。
+- 背景／边框／阴影作用于 dialog，backdropBackground 作用于原生 `::backdrop`；内容颜色与
+  标题颜色独立，颜色之间不派生。禁用关闭图标仍使用全局 colorTextMuted。
+- 父子 Provider 按字段继承；空对象／undefined 不擦除父值，撤销恢复父层或 CSS 回退。
+  祖先 CSS 和 dialog 的 style 同样可以设置公开变量；不额外复制主题或建立 Portal。
+- 默认宽度 `min(32rem, calc(100% - 2rem))`（16px根字号时最大512px）、圆角8px，标题16px、
+  正文14px。长内容区独立滚动，标题和 footer 保持可见；宽度由普通 CSS 覆盖，不开放宽度 Token。
+
+```tsx
+<ThemeProvider theme={{ components: { Dialog: { borderRadius: 12, titleColor: '#166534' } } }}>
+  <Dialog open={open} onOpenChange={setOpen} title="编辑" closeLabel="关闭编辑">内容</Dialog>
+</ThemeProvider>
+```
+
 ## 组件
 
 ### Button 与 LinkButton
@@ -770,6 +803,49 @@ Escape、Tab、外部点击关闭但不提交，外部点击不抢焦点；关�
 首个 Escape 仅关闭 Select，下一次留给原生 Dialog；默认关闭时不渲染 listbox。
 name/form 属性不代表支持原生 select 的表单值提交、校验或重置，由业务处理。
 
+### Dialog（当前源码，尚未发布）
+
+```tsx
+import { useRef, useState } from 'react'
+import { Button, Dialog, Select } from 'matthew-ui'
+
+export function EditNote() {
+  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState('fact')
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  return <>
+    <Button onClick={() => setOpen(true)}>新建记忆</Button>
+    <Dialog ref={dialogRef} open={open} onOpenChange={setOpen}
+      title="新建记忆" closeLabel="关闭新建记忆" initialFocus={() => inputRef.current}
+      footer={<Button onClick={() => setOpen(false)}>取消</Button>}>
+      <label>标题<input ref={inputRef} defaultValue="" /></label>
+      <Select value={value} onValueChange={setValue} aria-label="类型"
+        options={[{ value: 'fact', label: '事实' }, { value: 'preference', label: '偏好' }]}
+        popupHost={() => dialogRef.current} />
+    </Dialog>
+  </>
+}
+```
+
+`open/onOpenChange/title/closeLabel/children` 必填，仅受控模态；ref 指向 HTMLDialogElement。
+默认 Escape 与关闭按钮请求 `onOpenChange(false)`，调用方不更新 open 时保持模态；
+调用方主动改 open 不重复回调。遮罩默认不关闭，`closeOnBackdrop` 可启用；内容拖到遮罩
+释放不误关闭。`dismissible={false}` 统一禁用图标、Escape 和遮罩关闭，保存状态仍由业务管理。
+
+`footer` 可省略，不内置确定／取消／保存按钮。关闭后内容保持挂载且隐藏，草稿与子模块
+状态保留；需要销毁由父层条件渲染，Dialog 不 reset。表单与正常 submit 不被接管，不应
+用 `method="dialog"` 或 ref.close/showModal 绕过受控状态，也不要手动传非模态语义属性。
+
+打开时 `initialFocus` 返回的有效内部节点优先，否则使用原生 autofocus 属性或标题；
+React autoFocus 不保证重开后再次定位，表单建议传 input ref。原生模态限制背景交互，
+关闭／卸载还原仍有效的打开前焦点与文档滚动样式。Dialog 内 Select 的第一次 Escape
+只关闭列表，再次才请求关闭 Dialog；必须给 Select 提供 dialog 内部 popupHost。
+SSR 输出关闭 shell，客户端再按 open 建立模态；仅支持具有原生 dialog/showModal 的现代浏览器。
+
+按需使用引入 `matthew-ui/dialog`、`tokens.css`、`dialog/style.css`；组合 Button、Select 时
+也显式引入各自样式，或使用全量 `styles.css`。输入框与业务表单布局由调用方负责。
+
 ## 公开入口
 
 | 入口 | 内容 |
@@ -782,6 +858,7 @@ name/form 属性不代表支持原生 select 的表单值提交、校验或重�
 | `matthew-ui/tool-call` | ToolCall 及对应类型 |
 | `matthew-ui/task-list` | TaskList/TaskStatus/TaskListItem 及对应类型 |
 | `matthew-ui/select` | Select/SelectOption/SelectProps（当前源码，尚未发布） |
+| `matthew-ui/dialog` | Dialog/DialogProps（当前源码，尚未发布） |
 | `matthew-ui/theme` | ThemeProvider、主题预设、Token API 及对应类型 |
 | `matthew-ui/tokens.css` | 默认亮色 `:root` Token |
 | `matthew-ui/button/style.css` | Button/LinkButton 样式 |
@@ -791,15 +868,16 @@ name/form 属性不代表支持原生 select 的表单值提交、校验或重�
 | `matthew-ui/tool-call/style.css` | ToolCall 样式 |
 | `matthew-ui/task-list/style.css` | TaskList 样式 |
 | `matthew-ui/select/style.css` | Select 样式（当前源码，尚未发布） |
+| `matthew-ui/dialog/style.css` | Dialog 样式（当前源码，尚未发布） |
 | `matthew-ui/styles.css` | Token 与全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
 
 ## 质量验证
 
-- 368 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
-- 68 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
-- 75 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
+- 387 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
+- 76 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
+- 83 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
 - 真实 `npm pack` tarball 会分别安装到 React 18.2 与 React 19 临时消费端，验证 ESM、CommonJS、类型、CSS、DOM ref、公开入口边界和 Vite Tree Shaking。
 - Chromium 验证无 Provider 的默认 Token 回退，以及按需/全量 CSS 的 Button/LinkButton 定制尺寸、颜色、真实 hover/active 与作用域隔离。
 - Menu还经过真实挂载，验证两种CSS模式的默认/定制尺寸、选中悬停、父标题和浮层；不以SSR静态标记代替子菜单注册与展开。
@@ -808,6 +886,7 @@ name/form 属性不代表支持原生 select 的表单值提交、校验或重�
 - ToolCall 从真实安装包验证默认/定制标题栏、五种状态图形与颜色、无详情状态行、明暗与嵌套主题、宽视口中的窄容器摘要隐藏与恢复、40% 文本空间上限及 reduced-motion 圆环降级。
 - TaskList 从真实安装包验证默认/定制面板样式、宽度约束、五种状态图形与连接线、明暗与嵌套主题、折叠挂载、320px 窄宽摘要隐藏及 reduced-motion 圆环降级。
 - Select 从真实安装包验证两种 CSS 模式、16 字段定制、来源域 Portal 主题桥接、动态撤销、滚动与尺寸跟随、边界翻转、窄视口、变换宿主与原生 Dialog 的两次 Escape。
+- Dialog 从真实安装包验证原生模态、受控关闭、焦点与滚动恢复、保留草稿、12字段主题与遮罩、375px窄视口、200%字体、reduced-motion及 Select 两次 Escape。
 
 ## 本地开发
 

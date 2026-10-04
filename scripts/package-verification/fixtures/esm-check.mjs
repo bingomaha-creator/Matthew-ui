@@ -6,6 +6,7 @@ import { JSDOM } from 'jsdom'
 const expectedExports = [
   'AutoComplete',
   'Button',
+  'Dialog',
   'LinkButton',
   'Menu',
   'Select',
@@ -26,6 +27,7 @@ const thinkingModule = await import('matthew-ui/thinking')
 const toolCallModule = await import('matthew-ui/tool-call')
 const taskListModule = await import('matthew-ui/task-list')
 const selectModule = await import('matthew-ui/select')
+const dialogModule = await import('matthew-ui/dialog')
 const themeModule = await import('matthew-ui/theme')
 
 // 在 React 18/19 各自的真实安装环境验证新配置；不依赖浏览器 effect 才输出变量。
@@ -103,6 +105,11 @@ assert.deepEqual(Object.keys(thinkingModule), ['Thinking'])
 assert.deepEqual(Object.keys(toolCallModule), ['ToolCall'])
 assert.deepEqual(Object.keys(taskListModule).sort(), ['TaskList'])
 assert.deepEqual(Object.keys(selectModule), ['Select'])
+assert.deepEqual(Object.keys(dialogModule), ['Dialog'])
+const dialogHtml = renderToStaticMarkup(createElement(dialogModule.Dialog, { open: true, onOpenChange: () => {}, title: 'Dialog', closeLabel: 'Close' }, 'SSR body'))
+assert.match(dialogHtml, /<dialog/)
+assert.match(dialogHtml, /SSR body/)
+assert.doesNotMatch(dialogHtml, /<dialog[^>]*\sopen(?:=|\s|>)/)
 assert.match(renderToStaticMarkup(createElement(selectModule.Select, {
   value: '', options: [{ value: '', label: 'All' }], onValueChange: () => {},
 })), /role="combobox"/)
@@ -122,6 +129,7 @@ for (const cssEntry of [
   'matthew-ui/tool-call/style.css',
   'matthew-ui/task-list/style.css',
   'matthew-ui/select/style.css',
+  'matthew-ui/dialog/style.css',
   'matthew-ui/styles.css',
 ]) {
   assert.match(import.meta.resolve(cssEntry), /\.css$/)

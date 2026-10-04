@@ -78,6 +78,12 @@
       "require": "./dist/select/index.cjs"
     },
     "./select/style.css": "./dist/select/style.css",
+    "./dialog": {
+      "types": "./dist/dialog/index.d.ts",
+      "import": "./dist/dialog/index.js",
+      "require": "./dist/dialog/index.cjs"
+    },
+    "./dialog/style.css": "./dist/dialog/style.css",
     "./theme": {
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.js",

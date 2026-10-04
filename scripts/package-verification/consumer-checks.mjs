@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { checkBrowserStyles, checkMenuBrowserStyles, checkAutoCompleteBrowserStyles, checkThinkingBrowserStyles, checkToolCallBrowserStyles, checkTaskListBrowserStyles, checkSelectBrowserStyles } from './style-checks.mjs'
+import { checkBrowserStyles, checkMenuBrowserStyles, checkAutoCompleteBrowserStyles, checkThinkingBrowserStyles, checkToolCallBrowserStyles, checkTaskListBrowserStyles, checkSelectBrowserStyles, checkDialogBrowserStyles } from './style-checks.mjs'
 
 const writeJson = (path, value) =>
   writeFile(path, `${JSON.stringify(value, null, 2)}\n`)
@@ -180,6 +180,9 @@ export async function checkConsumers({
     await check(`${consumer.label} Chromium preserves Select Portal, theme, geometry and focus`, () =>
       checkSelectBrowserStyles({ packageRoot: join(consumerDirectory, 'node_modules/matthew-ui'), consumerDirectory }),
     )
+    await check(`${consumer.label} Chromium preserves Dialog modality, theme, focus and responsive layout`, () =>
+      checkDialogBrowserStyles({ packageRoot: join(consumerDirectory, 'node_modules/matthew-ui'), consumerDirectory }),
+    )
     await check(`${consumer.label} Vite build preserves on-demand JS and CSS`, async () => {
       for (const scenario of ['subpath-button', 'root-button']) {
         const output = await buildViteScenario(consumerDirectory, scenario)
@@ -196,6 +199,7 @@ export async function checkConsumers({
         assert.doesNotMatch(javascript, /matthew-tool-call/)
         assert.doesNotMatch(javascript, /matthew-task-list/)
         assert.doesNotMatch(javascript, /matthew-select/)
+        assert.doesNotMatch(javascript, /matthew-dialog/)
         assert.equal(cssFiles.length, 0, `${scenario} emitted implicit CSS`)
       }
 
@@ -210,7 +214,7 @@ export async function checkConsumers({
 
       assert.doesNotMatch(
         themeJavascript,
-        /matthew-(?:button|menu|auto-complete|thinking|tool-call|task-list|select)/,
+        /matthew-(?:button|menu|auto-complete|thinking|tool-call|task-list|select|dialog)/,
       )
       assert.equal(
         themeOutput.filter(({ path }) => path.endsWith('.css')).length,
@@ -235,6 +239,7 @@ export async function checkConsumers({
       assert.doesNotMatch(css, /\.matthew-tool-call/)
       assert.doesNotMatch(css, /\.matthew-task-list/)
       assert.doesNotMatch(css, /\.matthew-select/)
+      assert.doesNotMatch(css, /\.matthew-dialog/)
     })
   }
 }

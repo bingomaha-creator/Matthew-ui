@@ -20,6 +20,13 @@ const requiredPackageFiles = [
   'dist/button/index.js.map',
   'dist/button/style.css',
   'dist/button/style.css.map',
+  'dist/dialog/index.cjs',
+  'dist/dialog/index.cjs.map',
+  'dist/dialog/index.d.ts',
+  'dist/dialog/index.js',
+  'dist/dialog/index.js.map',
+  'dist/dialog/style.css',
+  'dist/dialog/style.css.map',
   'dist/index.cjs',
   'dist/index.cjs.map',
   'dist/index.d.ts',
@@ -81,6 +88,8 @@ const expectedPublicExports = [
   'ButtonVariant',
   'CssVariableMap',
   'CssVariableName',
+  'Dialog',
+  'DialogProps',
   'HexColor',
   'LinkButton',
   'LinkButtonProps',
@@ -215,6 +224,8 @@ const assertExports = (manifest) => {
     './auto-complete/style.css',
     './button',
     './button/style.css',
+    './dialog',
+    './dialog/style.css',
     './menu',
     './menu/style.css',
     './select',
@@ -244,6 +255,12 @@ const assertExports = (manifest) => {
     import: './dist/button/index.js',
     require: './dist/button/index.cjs',
   })
+  assert.deepEqual(manifest.exports['./dialog'], {
+    types: './dist/dialog/index.d.ts',
+    import: './dist/dialog/index.js',
+    require: './dist/dialog/index.cjs',
+  })
+  assert.equal(manifest.exports['./dialog/style.css'], './dist/dialog/style.css')
   assert.deepEqual(manifest.exports['./auto-complete'], {
     types: './dist/auto-complete/index.d.ts',
     import: './dist/auto-complete/index.js',
@@ -462,6 +479,7 @@ export async function checkPackage({ packedRoot, packedManifest, packageFiles, c
       'Menu',
       'AutoComplete',
       'Select',
+      'Dialog',
       'ThemeProvider',
     ]) {
       assert.match(
