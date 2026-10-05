@@ -16,6 +16,7 @@ import { toolCallTokensToCssVars } from './toolCallComponentTokens'
 import { taskListTokensToCssVars } from './taskListComponentTokens'
 import { selectTokensToCssVars } from './selectComponentTokens'
 import { dialogTokensToCssVars } from './dialogComponentTokens'
+import { sourceListTokensToCssVars } from './sourceListComponentTokens'
 
 export interface ThemeProviderProps
   extends Omit<ComponentPropsWithoutRef<'div'>, 'children'> {
@@ -52,6 +53,7 @@ function mergeThemeConfig(
 ): MatthewThemeConfig {
   return {
     components: {
+      SourceList: mergeDefinedFields(parentTheme?.components?.SourceList, theme?.components?.SourceList),
       Dialog: mergeDefinedFields(parentTheme?.components?.Dialog, theme?.components?.Dialog),
       Select: mergeDefinedFields(parentTheme?.components?.Select, theme?.components?.Select),
       // 每个组件分别合并：子级只改一种组件不能丢失其他组件配置。
@@ -106,6 +108,7 @@ export function ThemeProvider({
     ...taskListTokensToCssVars(mergedTheme.components?.TaskList),
     ...selectTokensToCssVars(mergedTheme.components?.Select),
     ...dialogTokensToCssVars(mergedTheme.components?.Dialog),
+    ...sourceListTokensToCssVars(mergedTheme.components?.SourceList),
   }
 
   // 只覆盖配置实际输出的变量；无配置时不写组件默认值，让 CSS 继承继续工作。

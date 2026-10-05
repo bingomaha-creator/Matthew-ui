@@ -84,6 +84,12 @@
       "require": "./dist/dialog/index.cjs"
     },
     "./dialog/style.css": "./dist/dialog/style.css",
+    "./source-list": {
+      "types": "./dist/source-list/index.d.ts",
+      "import": "./dist/source-list/index.js",
+      "require": "./dist/source-list/index.cjs"
+    },
+    "./source-list/style.css": "./dist/source-list/style.css",
     "./theme": {
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.js",

@@ -41,6 +41,7 @@ const {
   LinkButton,
   Menu,
   Select,
+  SourceList,
   TaskList,
   ThemeProvider,
   Thinking,
@@ -56,6 +57,7 @@ const toolCallRef = createRef()
 const taskListRef = createRef()
 const selectRef = createRef()
 const dialogRef = createRef()
+const sourceListRef = createRef()
 const container = document.querySelector('#root')
 const root = createRoot(container)
 
@@ -106,6 +108,7 @@ flushSync(() => {
         onValueChange: () => {}, 'aria-label': 'Select ref',
       }),
       createElement(Dialog, { ref: dialogRef, open: false, title: 'Dialog ref', closeLabel: 'Close', onOpenChange: () => {} }, 'Content'),
+      createElement(SourceList, { ref: sourceListRef, items: [{ id: 'one', title: 'Document' }], 'data-ref-target': 'source-list' }),
       createElement(
         Menu,
         { 'aria-label': 'Navigation' },
@@ -134,6 +137,9 @@ assert.ok(taskListRef.current instanceof window.HTMLDivElement)
 assert.ok(selectRef.current instanceof window.HTMLButtonElement)
 assert.ok(dialogRef.current instanceof window.HTMLDialogElement)
 assert.ok(dialogRef.current.isConnected)
+assert.ok(sourceListRef.current instanceof window.HTMLDivElement)
+assert.equal(sourceListRef.current, container.querySelector('[data-ref-target="source-list"]'))
+assert.ok(sourceListRef.current.isConnected)
 assert.equal(dialogRef.current.open, false)
 assert.equal(selectRef.current.getAttribute('role'), 'combobox')
 assert.strictEqual(

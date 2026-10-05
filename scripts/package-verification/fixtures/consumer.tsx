@@ -9,6 +9,7 @@ import {
   LinkButton,
   Menu,
   Select,
+  SourceList,
   TaskList,
   ThemeProvider,
   Thinking,
@@ -24,6 +25,8 @@ import { Select as SubpathSelect } from 'matthew-ui/select'
 import type { SelectOption, SelectProps } from 'matthew-ui/select'
 import { Dialog as SubpathDialog } from 'matthew-ui/dialog'
 import type { DialogProps } from 'matthew-ui/dialog'
+import { SourceList as SubpathSourceList } from 'matthew-ui/source-list'
+import type { SourceListItem, SourceListProps } from 'matthew-ui/source-list'
 import {
   darkTheme as subpathDarkTheme,
   ThemeProvider as SubpathThemeProvider,
@@ -114,6 +117,24 @@ const buttonRef = createRef<HTMLButtonElement>()
 const anchorRef = createRef<HTMLAnchorElement>()
 const inputRef = createRef<HTMLInputElement>()
 const divRef = createRef<HTMLDivElement>()
+const sourceItems: readonly SourceListItem[] = [{ id: 'document', title: 'Document', summary: 'Evidence', href: '/docs', target: '_blank', domId: 'consumer-source' }]
+const sourceProps: SourceListProps = { items: sourceItems, title: 'Sources', onOpenChange: open => void open }
+const rootSourceList = <SourceList {...sourceProps} ref={divRef} />
+const subpathSourceList = <SubpathSourceList items={sourceItems} defaultOpen />
+const sourceTheme: MatthewThemeConfig = { components: { SourceList: {
+  background: 'white', borderColor: 'gray', headerColor: 'black', headerHoverBackground: '#f1f5f9',
+  itemTitleColor: 'black', summaryColor: 'black', sourceColor: 'gray', linkColor: 'blue',
+  borderRadius: 8, headerMinHeight: 40, itemPaddingBlock: 12, itemPaddingInline: 12,
+} } }
+// @ts-expect-error No rich children API.
+const invalidSourceChildren = <SourceList items={sourceItems}>Content</SourceList>
+// @ts-expect-error No public width Token.
+const invalidSourceTheme: MatthewThemeConfig = { components: { SourceList: { width: 400 } } }
+// @ts-expect-error SourceList component tokens are not a separate public export.
+import type { SourceListComponentTokens } from 'matthew-ui'
+declare const privateSourceTokens: SourceListComponentTokens
+void privateSourceTokens
+void [rootSourceList, subpathSourceList, sourceTheme, invalidSourceChildren, invalidSourceTheme]
 const selectOptions: SelectOption[] = [{ value: '', label: 'All' }]
 const dialogRef = createRef<HTMLDialogElement>()
 const dialogProps: DialogProps = { open: false, onOpenChange: open => void open, title: 'Dialog', closeLabel: 'Close', children: 'Content' }

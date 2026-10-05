@@ -78,6 +78,7 @@ const componentStyleEntries = [
   ['TaskList/TaskList.scss', 'task-list/style.css'],
   ['Select/Select.scss', 'select/style.css'],
   ['Dialog/Dialog.scss', 'dialog/style.css'],
+  ['SourceList/SourceList.scss', 'source-list/style.css'],
 ]
 
 for (const [source, output] of componentStyleEntries) {
@@ -101,6 +102,7 @@ const globalAdapterSource = [
   '@use "src/components/TaskList/TaskList";',
   '@use "src/components/Select/Select";',
   '@use "src/components/Dialog/Dialog";',
+  '@use "src/components/SourceList/SourceList";',
   tokenAdapterSource,
 ].join('\n')
 const globalResult = compileString(globalAdapterSource, {

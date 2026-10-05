@@ -1,0 +1,88 @@
+@use '../../styles/mixins' as mixins;
+
+.matthew-source-list {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  color: var(--matthew-ui-color-text);
+  font: inherit;
+
+  &--framed {
+    border: 1px solid var(--matthew-ui-source-list-border-color, var(--matthew-ui-color-border));
+    border-radius: var(--matthew-ui-source-list-radius, var(--matthew-ui-radius-md));
+    background: var(--matthew-ui-source-list-background, var(--matthew-ui-color-surface));
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--matthew-ui-source-list-header-min-height, var(--matthew-ui-control-height-md));
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    border-radius: var(--matthew-ui-source-list-radius, var(--matthew-ui-radius-md));
+    background: transparent;
+    color: var(--matthew-ui-source-list-header-color, var(--matthew-ui-color-text));
+    font: inherit;
+    font-size: var(--matthew-ui-font-size-md);
+    font-weight: 500;
+    line-height: 1.6;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--matthew-ui-duration-fast) ease;
+    @include mixins.focus-ring;
+
+    &:hover { background: var(--matthew-ui-source-list-header-hover-background, var(--matthew-ui-color-surface-hover)); }
+  }
+
+  &__title { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  &__count { flex: none; color: var(--matthew-ui-color-text-muted); font-size: calc(var(--matthew-ui-font-size-sm) - 0.0625rem); font-weight: 400; font-variant-numeric: tabular-nums; }
+  &__arrow {
+    flex: none;
+    box-sizing: border-box;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin: 0.25rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform var(--matthew-ui-duration-fast) ease;
+  }
+  &__header[aria-expanded='true'] &__arrow { transform: rotate(225deg); }
+  &__list { margin: 0; padding: 0; list-style: none; }
+  &__list[hidden] { display: none; }
+  &--framed &__list:not([hidden]):not(:empty) { border-top: 1px solid var(--matthew-ui-source-list-border-color, var(--matthew-ui-color-border)); }
+  &__item {
+    min-width: 0;
+    font-size: var(--matthew-ui-font-size-md);
+    padding-block: var(--matthew-ui-source-list-item-padding-block, 0.75rem);
+    padding-inline: var(--matthew-ui-source-list-item-padding-inline, 0);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    // 业务从鼠标引用入口调用 focus() 也要显示证据定位，不仅键盘 focus-visible。
+    &:focus { outline: 3px solid var(--matthew-ui-color-focus); outline-offset: 2px; }
+    & + & { border-top: 1px solid var(--matthew-ui-source-list-border-color, var(--matthew-ui-color-border)); }
+    > * { display: block; margin: 0; }
+    > * + * { margin-top: 0.375rem; }
+  }
+  &--framed &__item { padding-inline: var(--matthew-ui-source-list-item-padding-inline, 0.75rem); }
+  &__item-title { color: var(--matthew-ui-source-list-item-title-color, var(--matthew-ui-color-text)); font-size: var(--matthew-ui-font-size-md); font-weight: 500; }
+  a.matthew-source-list__item-title {
+    color: var(--matthew-ui-source-list-link-color, var(--matthew-ui-color-primary-active));
+    text-decoration: none;
+    @include mixins.focus-ring;
+    &:hover { text-decoration: underline; }
+  }
+  &__summary { color: var(--matthew-ui-source-list-summary-color, var(--matthew-ui-color-text)); font-size: var(--matthew-ui-font-size-sm); font-weight: 400; }
+  &__source { color: var(--matthew-ui-source-list-source-color, var(--matthew-ui-color-text-muted)); font-size: calc(var(--matthew-ui-font-size-sm) - 0.0625rem); font-weight: 400; }
+}
+
+@media (pointer: coarse) {
+  .matthew-source-list__header { min-height: max(2.75rem, var(--matthew-ui-source-list-header-min-height, var(--matthew-ui-control-height-md))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .matthew-source-list__header, .matthew-source-list__arrow { transition: none; }
+}

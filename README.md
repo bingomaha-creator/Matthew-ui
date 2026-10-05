@@ -7,7 +7,7 @@
 
 Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu、AutoComplete，以及 agent 原生的 Thinking、ToolCall 和 TaskList 组件。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
 
-当前源码新增 Select 和 Dialog；这两个组件尚未发布，npm 的 `0.3.0` 不包含它们。下面的相关
+当前源码新增 Select、Dialog 和 SourceList；这三个组件尚未发布，npm 的 `0.3.0` 不包含它们。下面的相关
 示例用于本地构建或后续发布版本，不应直接用于已安装的 `0.3.0`。
 
 - [npm 包：`matthew-ui`](https://www.npmjs.com/package/matthew-ui)
@@ -591,6 +591,36 @@ export function CategoryFilter() {
 </ThemeProvider>
 ```
 
+### SourceList 组件定制（当前源码，尚未发布）
+
+`theme.components.SourceList` 的12个字段均可选，变量前缀为 `--matthew-ui-source-list-`：
+
+| 字段 | 类型 | CSS 变量后缀 | 默认回退 |
+| --- | --- | --- | --- |
+| background | string | background | colorSurface，仅带标题模式 |
+| borderColor | string | border-color | colorBorder，外框和分隔线 |
+| headerColor | string | header-color | colorText，标题和箭头 |
+| headerHoverBackground | string | header-hover-background | colorSurfaceHover |
+| itemTitleColor | string | item-title-color | colorText，非链接标题 |
+| summaryColor | string | summary-color | colorText |
+| sourceColor | string | source-color | colorTextMuted |
+| linkColor | string | link-color | colorPrimaryActive |
+| borderRadius | number ≥0 | radius | radiusMd，仅带标题模式 |
+| headerMinHeight | number >0 | header-min-height | controlHeightMd |
+| itemPaddingBlock | number ≥0 | item-padding-block | 12px / 0.75rem |
+| itemPaddingInline | number ≥0 | item-padding-inline | 带标题12px；无标题0 |
+
+数字按设计 px／16 转 rem，只接受有限数；颜色只校验 string 类型，不派生其他字段。
+undefined 不输出，null 字段报错。父子 Provider 按字段继承，撤销覆盖恢复父值或 CSS 回退。
+无标题始终透明、无外框；background 不改变这个模式，显式 itemPaddingInline 覆盖两种模式。
+字号跟随全局 Token，不开放独立宽度、字体、箭头或动画 Token，也不单独导出组件 Token 类型。
+
+```tsx
+<ThemeProvider theme={{ components: { SourceList: { linkColor: '#166534', itemPaddingBlock: 16 } } }}>
+  <SourceList title="参考来源" items={sources} />
+</ThemeProvider>
+```
+
 ## 组件
 
 ### Button 与 LinkButton
@@ -846,6 +876,47 @@ SSR 输出关闭 shell，客户端再按 open 建立模态；仅支持具有原�
 按需使用引入 `matthew-ui/dialog`、`tokens.css`、`dialog/style.css`；组合 Button、Select 时
 也显式引入各自样式，或使用全量 `styles.css`。输入框与业务表单布局由调用方负责。
 
+### SourceList（当前源码，尚未发布）
+
+```tsx
+import { useState } from 'react'
+import { SourceList } from 'matthew-ui'
+import type { SourceListItem } from 'matthew-ui'
+
+const sources: readonly SourceListItem[] = [
+  { id: 'doc-1', title: '项目架构文档', summary: '调用方提供的证据内容。\n全文换行，不默认截断。', source: '本地文档', domId: 'chat-run-1-doc-1' },
+  { id: 'web-1', title: 'React 文档', href: 'https://react.dev', target: '_blank', source: 'react.dev' },
+]
+export function Sources() {
+  const [open, setOpen] = useState(false)
+  return <SourceList title="参考来源" items={sources} open={open} onOpenChange={setOpen} />
+}
+```
+
+items 必填，id/title 必填；id 在当前列表内唯一且稳定，严格按数组顺序展示。
+title、summary、source 都是纯文本，不解析 HTML／Markdown，不接受 children/renderItem。
+有标题默认收起，可用 defaultOpen 指定初始值；open 表示受控，按钮只上报请求，外部改变
+open 不触发回调。无标题（含空白标题）始终展示，无按钮；空列表保留语义列表但不显示数量。
+数量只计条目，不代表独立来源数。动态更新不重置展开态；跨虚拟列表重挂载应由业务保存 open。
+
+仅标题链接可点击，默认当前页 `_self`；`_blank` 自动设置 `noopener noreferrer`。
+URL 解析后只允许 HTTP(S) 及正常相对链接，其他协议／无效地址退化为普通文本。
+协议许可不保证目标内容可信，业务仍可实施更严格的来源策略；组件不联网或获取正文。
+
+折叠保留挂载，通过 hidden 排除键盘导航和可访问树。外部折叠时内部焦点回到标题，
+外部焦点不被抢走。domId 原样用于 li id 与 tabIndex=-1，调用方保证整个页面唯一；
+Research 定位由业务请求展开、等待提交，再 scrollIntoView 和 focus，不由组件自动执行。
+不提供引用编号、逐条折叠、业务路由、代码渲染或证据管理。
+
+默认宽度100%跟随容器，业务用正常 CSS 限宽；正文全文换行，明暗跟随主题，无 Portal。
+按需使用：
+
+```tsx
+import { SourceList } from 'matthew-ui/source-list'
+import 'matthew-ui/tokens.css'
+import 'matthew-ui/source-list/style.css'
+```
+
 ## 公开入口
 
 | 入口 | 内容 |
@@ -859,6 +930,7 @@ SSR 输出关闭 shell，客户端再按 open 建立模态；仅支持具有原�
 | `matthew-ui/task-list` | TaskList/TaskStatus/TaskListItem 及对应类型 |
 | `matthew-ui/select` | Select/SelectOption/SelectProps（当前源码，尚未发布） |
 | `matthew-ui/dialog` | Dialog/DialogProps（当前源码，尚未发布） |
+| `matthew-ui/source-list` | SourceList/SourceListItem/SourceListProps（当前源码，尚未发布） |
 | `matthew-ui/theme` | ThemeProvider、主题预设、Token API 及对应类型 |
 | `matthew-ui/tokens.css` | 默认亮色 `:root` Token |
 | `matthew-ui/button/style.css` | Button/LinkButton 样式 |
@@ -869,15 +941,16 @@ SSR 输出关闭 shell，客户端再按 open 建立模态；仅支持具有原�
 | `matthew-ui/task-list/style.css` | TaskList 样式 |
 | `matthew-ui/select/style.css` | Select 样式（当前源码，尚未发布） |
 | `matthew-ui/dialog/style.css` | Dialog 样式（当前源码，尚未发布） |
+| `matthew-ui/source-list/style.css` | SourceList 样式（当前源码，尚未发布） |
 | `matthew-ui/styles.css` | Token 与全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
 
 ## 质量验证
 
-- 388 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
-- 76 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
-- 83 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
+- 406 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
+- 88 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
+- 94 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
 - 真实 `npm pack` tarball 会分别安装到 React 18.2 与 React 19 临时消费端，验证 ESM、CommonJS、类型、CSS、DOM ref、公开入口边界和 Vite Tree Shaking。
 - Chromium 验证无 Provider 的默认 Token 回退，以及按需/全量 CSS 的 Button/LinkButton 定制尺寸、颜色、真实 hover/active 与作用域隔离。
 - Menu还经过真实挂载，验证两种CSS模式的默认/定制尺寸、选中悬停、父标题和浮层；不以SSR静态标记代替子菜单注册与展开。
@@ -887,6 +960,7 @@ SSR 输出关闭 shell，客户端再按 open 建立模态；仅支持具有原�
 - TaskList 从真实安装包验证默认/定制面板样式、宽度约束、五种状态图形与连接线、明暗与嵌套主题、折叠挂载、320px 窄宽摘要隐藏及 reduced-motion 圆环降级。
 - Select 从真实安装包验证两种 CSS 模式、16 字段定制、来源域 Portal 主题桥接、动态撤销、滚动与尺寸跟随、边界翻转、窄视口、变换宿主与原生 Dialog 的两次 Escape。
 - Dialog 从真实安装包验证原生模态、受控关闭、焦点与滚动恢复、保留草稿、12字段主题与遮罩、375px窄视口、200%字体、reduced-motion及 Select 两次 Escape。
+- SourceList 从真实安装包验证两种 CSS 模式、折叠挂载与 Tab 排除、链接安全、焦点回退、12字段定制与动态撤销、320px容器／375px视口、200%字体和真实 reduced-motion。
 
 ## 本地开发
 

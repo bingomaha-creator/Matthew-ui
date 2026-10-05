@@ -6,6 +6,7 @@ import type { ToolCallComponentTokens } from './toolCallComponentTokens'
 import type { TaskListComponentTokens } from './taskListComponentTokens'
 import type { SelectComponentTokens } from './selectComponentTokens'
 import type { DialogComponentTokens } from './dialogComponentTokens'
+import type { SourceListComponentTokens } from './sourceListComponentTokens'
 
 /**
  * 模板字符串类型只能在编译期约束“以 # 开头”；六位 hex 的真实性仍需运行时校验。
@@ -60,6 +61,7 @@ export interface MatthewThemeConfig {
     TaskList?: TaskListComponentTokens
     Select?: SelectComponentTokens
     Dialog?: DialogComponentTokens
+    SourceList?: SourceListComponentTokens
   }
   /** 参与颜色、尺寸等家族派生。 */
   seed?: Partial<MatthewSeedToken>

@@ -48,6 +48,13 @@ const requiredPackageFiles = [
   'dist/select/index.js.map',
   'dist/select/style.css',
   'dist/select/style.css.map',
+  'dist/source-list/index.cjs',
+  'dist/source-list/index.cjs.map',
+  'dist/source-list/index.d.ts',
+  'dist/source-list/index.js',
+  'dist/source-list/index.js.map',
+  'dist/source-list/style.css',
+  'dist/source-list/style.css.map',
   'dist/thinking/index.cjs',
   'dist/thinking/index.cjs.map',
   'dist/thinking/index.d.ts',
@@ -105,6 +112,9 @@ const expectedPublicExports = [
   'Select',
   'SelectOption',
   'SelectProps',
+  'SourceList',
+  'SourceListItem',
+  'SourceListProps',
   'TaskList',
   'TaskListItem',
   'TaskListProps',
@@ -230,6 +240,8 @@ const assertExports = (manifest) => {
     './menu/style.css',
     './select',
     './select/style.css',
+    './source-list',
+    './source-list/style.css',
     './styles.css',
     './task-list',
     './task-list/style.css',
@@ -297,6 +309,10 @@ const assertExports = (manifest) => {
     require: './dist/select/index.cjs',
   })
   assert.equal(manifest.exports['./select/style.css'], './dist/select/style.css')
+  assert.deepEqual(manifest.exports['./source-list'], {
+    types: './dist/source-list/index.d.ts', import: './dist/source-list/index.js', require: './dist/source-list/index.cjs',
+  })
+  assert.equal(manifest.exports['./source-list/style.css'], './dist/source-list/style.css')
   assert.equal(
     manifest.exports['./auto-complete/style.css'],
     './dist/auto-complete/style.css',
@@ -480,6 +496,7 @@ export async function checkPackage({ packedRoot, packedManifest, packageFiles, c
       'AutoComplete',
       'Select',
       'Dialog',
+      'SourceList',
       'ThemeProvider',
     ]) {
       assert.match(

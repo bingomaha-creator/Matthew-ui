@@ -46,6 +46,9 @@ export type { SelectOption, SelectProps } from './components/Select'
 export { Dialog } from './components/Dialog'
 export type { DialogProps } from './components/Dialog'
 
+export { SourceList } from './components/SourceList'
+export type { SourceListItem, SourceListProps } from './components/SourceList'
+
 export {
   createTokens,
   darkTheme,
