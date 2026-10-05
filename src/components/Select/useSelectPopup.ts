@@ -91,8 +91,9 @@ export function useSelectPopup(
       if (!ancestors.includes(node)) ancestors.push(node)
     }
     const mutation = new MutationObserver(schedule)
-    // 不观察 popup 自身，否则主题桥接的 style 写入会触发无限反馈。
-    ancestors.forEach(node => mutation.observe(node, { attributes: true, attributeFilter: ['style', 'class', 'dir'] }))
+    // CSS 选择器也可能依赖 data-* / aria-* 等属性，不限制属性名。
+    // 只观察祖先自身，不观察子树／popup，避免桥接 style 写入造成反馈。
+    ancestors.forEach(node => mutation.observe(node, { attributes: true }))
     const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(schedule)
     ancestors.forEach(node => resize?.observe(node))
     resize?.observe(popup)

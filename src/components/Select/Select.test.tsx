@@ -172,6 +172,29 @@ test('transformed scrolling host positions the popup in the same viewport coordi
   expect(Math.abs(list.getBoundingClientRect().width - button.element().getBoundingClientRect().width)).toBeLessThan(1)
 })
 
+test('an open Portal follows ancestor data attribute theme changes and removal without rerendering', async () => {
+  const screen = await render(<div data-select-theme="light" style={{ width: 240 }}>
+    <style>{`
+      [data-select-theme="light"] { --matthew-ui-select-popup-background: rgb(240, 241, 242); }
+      [data-select-theme="dark"] { --matthew-ui-select-popup-background: rgb(10, 20, 30); }
+    `}</style>
+    <Select value="a" options={options} onValueChange={vi.fn()} aria-label="Attribute theme" />
+  </div>)
+  const button = screen.getByRole('combobox')
+  await button.click()
+  const list = document.getElementById(button.element().getAttribute('aria-controls')!)!
+  await expect.poll(() => getComputedStyle(list).backgroundColor).toBe('rgb(240, 241, 242)')
+  // 等首次 ResizeObserver 通知完成，避免它意外替代属性观察而让旧实现通过。
+  await new Promise(resolve => setTimeout(resolve, 100))
+  const ancestor = button.element().parentElement!
+  ancestor.setAttribute('data-select-theme', 'dark')
+  await expect.poll(() => getComputedStyle(list).backgroundColor).toBe('rgb(10, 20, 30)')
+  ancestor.removeAttribute('data-select-theme')
+  await expect.poll(() => getComputedStyle(list).backgroundColor).toBe('rgb(255, 255, 255)')
+  expect(document.getElementById(button.element().getAttribute('aria-controls')!)).toBe(list)
+  expect(document.activeElement).toBe(button.element())
+})
+
 test('native modal dialog receives only the second Escape and uses an internal popupHost', async () => {
   const dialogRef = createRef<HTMLDialogElement>()
   const screen = await render(<dialog ref={dialogRef} style={{ width: 280 }}>
