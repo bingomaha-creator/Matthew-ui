@@ -5,10 +5,10 @@
 [![Storybook](https://img.shields.io/badge/Storybook-online-ff4785?logo=storybook&logoColor=white)](https://bingomaha-creator.github.io/Matthew-ui/)
 [![License](https://img.shields.io/npm/l/matthew-ui)](./LICENSE)
 
-Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu、AutoComplete，以及 agent 原生的 Thinking、ToolCall 和 TaskList 组件。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
+Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，提供 Button、Menu、AutoComplete、Select、Dialog，以及面向 agent 场景的 Thinking、ToolCall、TaskList、SourceList 和 CodeBlock 组件。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
 
-当前源码新增 Select、Dialog、SourceList 和 CodeBlock；这四个组件尚未发布，npm 的 `0.3.0` 不包含它们。下面的相关
-示例用于本地构建或后续发布版本，不应直接用于已安装的 `0.3.0`。
+本次 `0.4.0` 新增 Select、Dialog、SourceList 和 CodeBlock，并统一 ToolCall 与 Thinking 的标题栏视觉。
+下面的相关示例要求 `0.4.0` 或当前源码构建；已发布的 `0.3.0` 不包含这四个组件。
 
 - [npm 包：`matthew-ui`](https://www.npmjs.com/package/matthew-ui)
 - [在线 Storybook](https://bingomaha-creator.github.io/Matthew-ui/)
@@ -415,7 +415,7 @@ export function AgentToolCalls() {
 - 摘要靠右排列在箭头前，最多占可分配文本宽度的 40%，长名称与长摘要单行省略。
   组件宽度 ≤320px 时通过容器查询视觉隐藏摘要，仍保留辅助技术文本；宽视口中的
   窄容器同样生效。不支持容器查询的浏览器继续展示摘要并省略长文本。
-- 上述标题栏是 v0.3.0 之后的视觉调整，尚未发布；已发布 v0.3.0 使用 32px 标题行、
+- 上述标题栏是 v0.4.0 的视觉调整；v0.3.0 使用 32px 标题行、
   13px 名称、12px 摘要以及右／下箭头。公开 props、详情布局和展开行为保持一致。
 - 颜色字段只接受 CSS 字符串，彼此不派生；未提供的字段继续读取当前全局 Token：
   名称 colorText，摘要/详情/pending/stopped colorTextMuted，running colorPrimary，
@@ -500,7 +500,7 @@ export function AgentPlan() {
 三层组合、亮暗主题、15 字段精确覆盖、动态启用/撤销主题作用域、320px 窄宽
 摘要隐藏与 reduced-motion 降级效果。
 
-### Select 组件定制（当前源码，尚未发布）
+### Select 组件定制（v0.4.0）
 
 ```tsx
 import { Select } from 'matthew-ui/select'
@@ -558,7 +558,7 @@ export function CategoryFilter() {
 - 不开放宽度、层级、坐标、箭头角度或动画速度 Token。普通 CSS 管布局，
   自定义模态场景通过 popupHost 提供语义范围内的宿主。
 
-### Dialog 组件定制（当前源码，尚未发布）
+### Dialog 组件定制（v0.4.0）
 
 `theme.components.Dialog` 的12个字段均可选，变量前缀为 `--matthew-ui-dialog-`：
 
@@ -591,7 +591,7 @@ export function CategoryFilter() {
 </ThemeProvider>
 ```
 
-### SourceList 组件定制（当前源码，尚未发布）
+### SourceList 组件定制（v0.4.0）
 
 `theme.components.SourceList` 的12个字段均可选，变量前缀为 `--matthew-ui-source-list-`：
 
@@ -621,7 +621,7 @@ undefined 不输出，null 字段报错。父子 Provider 按字段继承，撤�
 </ThemeProvider>
 ```
 
-### CodeBlock 组件定制（当前源码，尚未发布）
+### CodeBlock 组件定制（v0.4.0）
 
 `theme.components.CodeBlock` 提供 8 个稀疏覆盖字段，不改变 23 个全局 Token：
 
@@ -822,7 +822,7 @@ export function AgentPlan() {
 以视觉隐藏文本加入条目可访问内容。条目是只读 `li`，模块不内置编辑、重试、
 取消或行内操作。
 
-### Select（当前源码，尚未发布）
+### Select（v0.4.0）
 
 ```tsx
 import { useState } from 'react'
@@ -854,7 +854,7 @@ Escape、Tab、外部点击关闭但不提交，外部点击不抢焦点；关�
 首个 Escape 仅关闭 Select，下一次留给原生 Dialog；默认关闭时不渲染 listbox。
 name/form 属性不代表支持原生 select 的表单值提交、校验或重置，由业务处理。
 
-### Dialog（当前源码，尚未发布）
+### Dialog（v0.4.0）
 
 ```tsx
 import { useRef, useState } from 'react'
@@ -897,7 +897,7 @@ SSR 输出关闭 shell，客户端再按 open 建立模态；仅支持具有原�
 按需使用引入 `matthew-ui/dialog`、`tokens.css`、`dialog/style.css`；组合 Button、Select 时
 也显式引入各自样式，或使用全量 `styles.css`。输入框与业务表单布局由调用方负责。
 
-### SourceList（当前源码，尚未发布）
+### SourceList（v0.4.0）
 
 ```tsx
 import { useState } from 'react'
@@ -938,7 +938,7 @@ import 'matthew-ui/tokens.css'
 import 'matthew-ui/source-list/style.css'
 ```
 
-### CodeBlock（当前源码，尚未发布）
+### CodeBlock（v0.4.0）
 
 ```tsx
 import { CodeBlock } from 'matthew-ui'
@@ -990,10 +990,10 @@ import 'matthew-ui/code-block/style.css'
 | `matthew-ui/thinking` | Thinking 及对应类型 |
 | `matthew-ui/tool-call` | ToolCall 及对应类型 |
 | `matthew-ui/task-list` | TaskList/TaskStatus/TaskListItem 及对应类型 |
-| `matthew-ui/select` | Select/SelectOption/SelectProps（当前源码，尚未发布） |
-| `matthew-ui/dialog` | Dialog/DialogProps（当前源码，尚未发布） |
-| `matthew-ui/source-list` | SourceList/SourceListItem/SourceListProps（当前源码，尚未发布） |
-| `matthew-ui/code-block` | CodeBlock/CodeBlockProps/CodeBlockCopyConfig（当前源码，尚未发布） |
+| `matthew-ui/select` | Select/SelectOption/SelectProps（v0.4.0） |
+| `matthew-ui/dialog` | Dialog/DialogProps（v0.4.0） |
+| `matthew-ui/source-list` | SourceList/SourceListItem/SourceListProps（v0.4.0） |
+| `matthew-ui/code-block` | CodeBlock/CodeBlockProps/CodeBlockCopyConfig（v0.4.0） |
 | `matthew-ui/theme` | ThemeProvider、主题预设、Token API 及对应类型 |
 | `matthew-ui/tokens.css` | 默认亮色 `:root` Token |
 | `matthew-ui/button/style.css` | Button/LinkButton 样式 |
@@ -1002,10 +1002,10 @@ import 'matthew-ui/code-block/style.css'
 | `matthew-ui/thinking/style.css` | Thinking 样式 |
 | `matthew-ui/tool-call/style.css` | ToolCall 样式 |
 | `matthew-ui/task-list/style.css` | TaskList 样式 |
-| `matthew-ui/select/style.css` | Select 样式（当前源码，尚未发布） |
-| `matthew-ui/dialog/style.css` | Dialog 样式（当前源码，尚未发布） |
-| `matthew-ui/source-list/style.css` | SourceList 样式（当前源码，尚未发布） |
-| `matthew-ui/code-block/style.css` | CodeBlock 样式（当前源码，尚未发布） |
+| `matthew-ui/select/style.css` | Select 样式（v0.4.0） |
+| `matthew-ui/dialog/style.css` | Dialog 样式（v0.4.0） |
+| `matthew-ui/source-list/style.css` | SourceList 样式（v0.4.0） |
+| `matthew-ui/code-block/style.css` | CodeBlock 样式（v0.4.0） |
 | `matthew-ui/styles.css` | Token 与全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
