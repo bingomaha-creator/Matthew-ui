@@ -1,6 +1,6 @@
 # SourceList 视觉合同
 
-状态：已实现；质量检查通过、尚未发布；Agent 接入另行验收
+状态：已实现；质量检查通过；已随 v0.4.0 发布
 确认日期：2026-10-05
 适用范围：P2-1 默认 SourceList、明暗、响应式与视觉验收
 行为依据：[SourceList 行为合同](source-list-behavior-contract.md)

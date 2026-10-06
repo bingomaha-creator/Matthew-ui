@@ -1,6 +1,6 @@
 # SourceList 行为合同
 
-状态：已实现；质量检查通过、尚未发布；Agent 接入另行验收
+状态：已实现；质量检查通过；已随 v0.4.0 发布
 确认日期：2026-10-05
 适用范围：P2-1 来源列表第一版
 视觉依据：[SourceList 视觉合同](source-list-visual-contract.md)

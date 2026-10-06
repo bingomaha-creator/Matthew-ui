@@ -2,9 +2,17 @@
 
 ## Current state
 
-- `matthew-ui@0.3.0` is published on npm with `latest=0.3.0`.
-- Registry `gitHead`, remote `v0.3.0`, and the GitHub Release resolve to
-  `c8127143be431eb883263b1f40acd4b0d9f2e17b`.
+- `matthew-ui@0.4.0` is published on npm with `latest=0.4.0`.
+- Registry `gitHead`, remote `v0.4.0`, and the GitHub Release resolve to
+  `d912acc9b01bc493f4834b465df3da7f2bd93dff`.
+- `0.4.0` was published by the protected GitHub `npm-release` environment
+  through npm Trusted Publishing. Registry SLSA provenance identifies
+  `.github/workflows/publish.yml`, `refs/tags/v0.4.0`, and that same commit.
+  The public tarball contains 131 files, is 150,098 bytes compressed, and
+  includes Select, Dialog, SourceList, and CodeBlock JS, types, and CSS entries.
+- Publication was verified on 2026-10-06; workflow run `37426722753` succeeded.
+  Consumer applications must separately upgrade their registry dependency;
+  an existing npm link is not proof of consuming the published version.
 - `0.3.0` was published by the protected GitHub `npm-release` environment
   through npm Trusted Publishing, with SLSA provenance recorded by the npm
   registry. Its public tarball contains 87 files and is approximately 97.2 kB.

@@ -1,6 +1,6 @@
 # Dialog 视觉合同
 
-状态：已实现；尚未发布\
+状态：已实现；已随 v0.4.0 发布\
 确认日期：2026-10-05\
 适用范围：P1-2 默认 Dialog、主题和视觉验收\
 行为依据：[Dialog 行为合同](dialog-behavior-contract.md)

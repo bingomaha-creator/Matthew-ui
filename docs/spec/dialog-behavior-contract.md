@@ -1,6 +1,6 @@
 # Dialog 行为合同
 
-状态：已实现；尚未发布\
+状态：已实现；已随 v0.4.0 发布\
 确认日期：2026-10-05\
 适用范围：P1-2 第一版受控模态 Dialog\
 视觉依据：[Dialog 视觉合同](dialog-visual-contract.md)
