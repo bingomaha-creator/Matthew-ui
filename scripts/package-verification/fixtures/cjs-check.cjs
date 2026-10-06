@@ -3,6 +3,7 @@ const assert = require('node:assert/strict')
 const expectedExports = [
   'AutoComplete',
   'Button',
+  'CodeBlock',
   'Dialog',
   'LinkButton',
   'Menu',
@@ -27,6 +28,7 @@ const taskListModule = require('matthew-ui/task-list')
 const selectModule = require('matthew-ui/select')
 const dialogModule = require('matthew-ui/dialog')
 const sourceListModule = require('matthew-ui/source-list')
+const codeBlockModule = require('matthew-ui/code-block')
 const themeModule = require('matthew-ui/theme')
 
 assert.deepEqual(Object.keys(ui).sort(), expectedExports)
@@ -39,6 +41,7 @@ assert.deepEqual(Object.keys(taskListModule), ['TaskList'])
 assert.deepEqual(Object.keys(selectModule), ['Select'])
 assert.deepEqual(Object.keys(dialogModule), ['Dialog'])
 assert.deepEqual(Object.keys(sourceListModule), ['SourceList'])
+assert.deepEqual(Object.keys(codeBlockModule), ['CodeBlock'])
 assert.deepEqual(Object.keys(themeModule).sort(), [
   'ThemeProvider',
   'createTokens',
@@ -57,6 +60,7 @@ for (const cssEntry of [
   'matthew-ui/select/style.css',
   'matthew-ui/dialog/style.css',
   'matthew-ui/source-list/style.css',
+  'matthew-ui/code-block/style.css',
   'matthew-ui/styles.css',
 ]) {
   assert.match(require.resolve(cssEntry), /\.css$/)

@@ -12,6 +12,7 @@ export default {
     select: 'src/components/Select/index.ts',
     dialog: 'src/components/Dialog/index.ts',
     'source-list': 'src/components/SourceList/index.ts',
+    'code-block': 'src/components/CodeBlock/index.ts',
     theme: 'src/theme/index.ts',
   },
   output: {

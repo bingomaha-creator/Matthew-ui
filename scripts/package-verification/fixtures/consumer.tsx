@@ -2,6 +2,7 @@ import { createRef } from 'react'
 import {
   AutoComplete,
   Button,
+  CodeBlock,
   Dialog,
   createTokens,
   darkTheme,
@@ -27,6 +28,8 @@ import { Dialog as SubpathDialog } from 'matthew-ui/dialog'
 import type { DialogProps } from 'matthew-ui/dialog'
 import { SourceList as SubpathSourceList } from 'matthew-ui/source-list'
 import type { SourceListItem, SourceListProps } from 'matthew-ui/source-list'
+import { CodeBlock as SubpathCodeBlock } from 'matthew-ui/code-block'
+import type { CodeBlockProps, CodeBlockCopyConfig } from 'matthew-ui/code-block'
 import {
   darkTheme as subpathDarkTheme,
   ThemeProvider as SubpathThemeProvider,
@@ -117,6 +120,20 @@ const buttonRef = createRef<HTMLButtonElement>()
 const anchorRef = createRef<HTMLAnchorElement>()
 const inputRef = createRef<HTMLInputElement>()
 const divRef = createRef<HTMLDivElement>()
+const codeCopy: CodeBlockCopyConfig = { label: 'Copy', copiedLabel: 'Copied', errorLabel: 'Failed' }
+const codeProps: CodeBlockProps = { code: 'Original', title: 'Source', language: 'TS', copy: codeCopy, wrap: true }
+const rootCodeBlock = <CodeBlock {...codeProps} ref={divRef} />
+const subpathCodeBlock = <SubpathCodeBlock {...codeProps} />
+const codeTheme: MatthewThemeConfig = { components: { CodeBlock: { background: 'white', color: 'black', borderColor: 'gray', headerBackground: 'white', headerColor: 'black', borderRadius: 8, paddingBlock: 12, paddingInline: 12 } } }
+// @ts-expect-error raw string is mandatory
+const invalidCode = <SubpathCodeBlock code={{ value: true }} />
+// @ts-expect-error no rich children
+const invalidCodeChildren = <CodeBlock code="raw">Text</CodeBlock>
+// @ts-expect-error component tokens are not a package export
+import type { CodeBlockComponentTokens } from 'matthew-ui'
+declare const privateCodeTokens: CodeBlockComponentTokens
+void privateCodeTokens
+void [rootCodeBlock, subpathCodeBlock, codeTheme, invalidCode, invalidCodeChildren]
 const sourceItems: readonly SourceListItem[] = [{ id: 'document', title: 'Document', summary: 'Evidence', href: '/docs', target: '_blank', domId: 'consumer-source' }]
 const sourceProps: SourceListProps = { items: sourceItems, title: 'Sources', onOpenChange: open => void open }
 const rootSourceList = <SourceList {...sourceProps} ref={divRef} />

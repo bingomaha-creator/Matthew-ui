@@ -20,6 +20,13 @@ const requiredPackageFiles = [
   'dist/button/index.js.map',
   'dist/button/style.css',
   'dist/button/style.css.map',
+  'dist/code-block/index.cjs',
+  'dist/code-block/index.cjs.map',
+  'dist/code-block/index.d.ts',
+  'dist/code-block/index.js',
+  'dist/code-block/index.js.map',
+  'dist/code-block/style.css',
+  'dist/code-block/style.css.map',
   'dist/dialog/index.cjs',
   'dist/dialog/index.cjs.map',
   'dist/dialog/index.d.ts',
@@ -93,6 +100,9 @@ const expectedPublicExports = [
   'ButtonProps',
   'ButtonSize',
   'ButtonVariant',
+  'CodeBlock',
+  'CodeBlockCopyConfig',
+  'CodeBlockProps',
   'CssVariableMap',
   'CssVariableName',
   'Dialog',
@@ -234,6 +244,8 @@ const assertExports = (manifest) => {
     './auto-complete/style.css',
     './button',
     './button/style.css',
+    './code-block',
+    './code-block/style.css',
     './dialog',
     './dialog/style.css',
     './menu',
@@ -313,6 +325,10 @@ const assertExports = (manifest) => {
     types: './dist/source-list/index.d.ts', import: './dist/source-list/index.js', require: './dist/source-list/index.cjs',
   })
   assert.equal(manifest.exports['./source-list/style.css'], './dist/source-list/style.css')
+  assert.deepEqual(manifest.exports['./code-block'], {
+    types: './dist/code-block/index.d.ts', import: './dist/code-block/index.js', require: './dist/code-block/index.cjs',
+  })
+  assert.equal(manifest.exports['./code-block/style.css'], './dist/code-block/style.css')
   assert.equal(
     manifest.exports['./auto-complete/style.css'],
     './dist/auto-complete/style.css',
@@ -497,6 +513,7 @@ export async function checkPackage({ packedRoot, packedManifest, packageFiles, c
       'Select',
       'Dialog',
       'SourceList',
+      'CodeBlock',
       'ThemeProvider',
     ]) {
       assert.match(

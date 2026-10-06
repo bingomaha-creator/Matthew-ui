@@ -1,0 +1,80 @@
+@use '../../styles/mixins';
+
+.matthew-code-block {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--matthew-ui-code-block-border-color, var(--matthew-ui-color-border));
+  border-radius: var(--matthew-ui-code-block-radius, var(--matthew-ui-radius-md));
+  background: var(--matthew-ui-code-block-background, var(--matthew-ui-color-surface));
+  color: var(--matthew-ui-code-block-color, var(--matthew-ui-color-text));
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 1rem;
+    min-height: 2.375rem;
+    box-sizing: border-box;
+    padding: 0.375rem 0.75rem;
+    background: var(--matthew-ui-code-block-header-background, var(--matthew-ui-color-surface-hover));
+    border-bottom: 1px solid var(--matthew-ui-code-block-border-color, var(--matthew-ui-color-border));
+    color: var(--matthew-ui-code-block-header-color, var(--matthew-ui-color-text));
+    font-size: var(--matthew-ui-font-size-sm);
+    line-height: 1.6;
+  }
+  &__heading { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.625rem; overflow-wrap: anywhere; }
+  &__heading:empty { display: none; }
+  &__title { font-weight: 500; min-width: 0; }
+  // Existing muted text is below 4.5:1 on the light header surface; size owns hierarchy.
+  &__language { color: var(--matthew-ui-color-text); font-size: calc(var(--matthew-ui-font-size-sm) - 0.0625rem); min-width: 0; }
+  &__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-left: auto; min-width: 0; max-width: 100%; }
+  &__feedback { font-size: calc(var(--matthew-ui-font-size-sm) - 0.0625rem); color: var(--matthew-ui-color-text); min-width: 0; overflow-wrap: anywhere; }
+  // Keep the live region registered before its text arrives, without reserving a gap.
+  &__feedback:empty { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  // Error remains explicit in localized text; global danger also fails on header surfaces.
+  &__feedback--error { color: var(--matthew-ui-color-text); }
+  &__copy {
+    min-width: 0;
+    max-width: 100%;
+    border: 0;
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.375rem;
+    background: transparent;
+    color: var(--matthew-ui-color-text);
+    font: inherit;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    transition: background-color var(--matthew-ui-duration-fast) ease;
+    @include mixins.focus-ring;
+    &:hover:not([aria-disabled='true']) { background: var(--matthew-ui-color-surface-active); color: var(--matthew-ui-color-text); }
+    &[aria-disabled='true'] { cursor: default; }
+  }
+  &__pre {
+    box-sizing: border-box;
+    min-width: 0;
+    margin: 0;
+    padding-block: var(--matthew-ui-code-block-padding-block, 0.75rem);
+    padding-inline: var(--matthew-ui-code-block-padding-inline, 0.75rem);
+    overflow: auto;
+    color: inherit;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: var(--matthew-ui-font-size-sm);
+    font-weight: 400;
+    line-height: 1.6;
+    white-space: pre;
+    tab-size: 2;
+    @include mixins.focus-ring;
+    &:focus-visible { outline-offset: -3px; }
+    > code { font: inherit; color: inherit; background: transparent; padding: 0; white-space: inherit; }
+  }
+  &--wrap &__pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+}
+@media (pointer: coarse) {
+  .matthew-code-block__copy { min-height: 2.75rem; min-width: 2.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .matthew-code-block__copy { transition: none; }
+}

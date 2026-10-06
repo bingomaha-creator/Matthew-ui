@@ -34,6 +34,7 @@ export default defineConfig({
         select: resolve(import.meta.dirname, 'src/components/Select/index.ts'),
         dialog: resolve(import.meta.dirname, 'src/components/Dialog/index.ts'),
         'source-list': resolve(import.meta.dirname, 'src/components/SourceList/index.ts'),
+        'code-block': resolve(import.meta.dirname, 'src/components/CodeBlock/index.ts'),
         theme: resolve(import.meta.dirname, 'src/theme/index.ts'),
       },
       formats: ['es', 'cjs'],

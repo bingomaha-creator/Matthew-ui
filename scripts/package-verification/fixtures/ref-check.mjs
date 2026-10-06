@@ -36,6 +36,7 @@ const { flushSync } = await import('react-dom')
 const {
   AutoComplete,
   Button,
+  CodeBlock,
   Dialog,
   darkTheme,
   LinkButton,
@@ -58,6 +59,7 @@ const taskListRef = createRef()
 const selectRef = createRef()
 const dialogRef = createRef()
 const sourceListRef = createRef()
+const codeBlockRef = createRef()
 const container = document.querySelector('#root')
 const root = createRoot(container)
 
@@ -109,6 +111,7 @@ flushSync(() => {
       }),
       createElement(Dialog, { ref: dialogRef, open: false, title: 'Dialog ref', closeLabel: 'Close', onOpenChange: () => {} }, 'Content'),
       createElement(SourceList, { ref: sourceListRef, items: [{ id: 'one', title: 'Document' }], 'data-ref-target': 'source-list' }),
+      createElement(CodeBlock, { ref: codeBlockRef, code: 'Raw', 'data-ref-target': 'code-block' }),
       createElement(
         Menu,
         { 'aria-label': 'Navigation' },
@@ -140,6 +143,9 @@ assert.ok(dialogRef.current.isConnected)
 assert.ok(sourceListRef.current instanceof window.HTMLDivElement)
 assert.equal(sourceListRef.current, container.querySelector('[data-ref-target="source-list"]'))
 assert.ok(sourceListRef.current.isConnected)
+assert.ok(codeBlockRef.current instanceof window.HTMLDivElement)
+assert.equal(codeBlockRef.current, container.querySelector('[data-ref-target="code-block"]'))
+assert.ok(codeBlockRef.current.isConnected)
 assert.equal(dialogRef.current.open, false)
 assert.equal(selectRef.current.getAttribute('role'), 'combobox')
 assert.strictEqual(

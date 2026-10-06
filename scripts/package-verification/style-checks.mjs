@@ -12,6 +12,7 @@ export { checkTaskListBrowserStyles } from './task-list-style-checks.mjs'
 export { checkSelectBrowserStyles } from './select-style-checks.mjs'
 export { checkDialogBrowserStyles } from './dialog-style-checks.mjs'
 export { checkSourceListBrowserStyles } from './source-list-style-checks.mjs'
+export { checkCodeBlockBrowserStyles } from './code-block-style-checks.mjs'
 
 /**
  * 样式验收使用真实 Chromium，HTML 来自消费端安装的组件。
@@ -150,12 +151,13 @@ export async function checkStyles({
     assert.doesNotMatch(css, /@import/)
     assert.doesNotMatch(
       css,
-      /\.matthew-(?:button|menu|auto-complete|thinking|tool-call|task-list|select|dialog|source-list)/,
+      /\.matthew-(?:button|menu|auto-complete|thinking|tool-call|task-list|select|dialog|source-list|code-block)/,
     )
     assert.match(css, /sourceMappingURL=tokens\.css\.map/)
   })
   await check('packed component CSS entries contain only their own style boundary', async () => {
     const componentStyles = [
+      { path: 'dist/code-block/style.css', marker: '.matthew-code-block', forbiddenMarkers: ['.matthew-button', '.matthew-menu', '.matthew-auto-complete', '.matthew-thinking', '.matthew-tool-call', '.matthew-task-list', '.matthew-select', '.matthew-dialog', '.matthew-source-list'] },
       { path: 'dist/source-list/style.css', marker: '.matthew-source-list', forbiddenMarkers: ['.matthew-button', '.matthew-menu', '.matthew-auto-complete', '.matthew-thinking', '.matthew-tool-call', '.matthew-task-list', '.matthew-select', '.matthew-dialog'] },
       {
         path: 'dist/dialog/style.css', marker: '.matthew-dialog',
@@ -204,6 +206,7 @@ export async function checkStyles({
       if (componentStyle.marker !== '.matthew-select') assert.ok(!css.includes('.matthew-select'))
       if (componentStyle.marker !== '.matthew-dialog') assert.ok(!css.includes('.matthew-dialog'))
       if (componentStyle.marker !== '.matthew-source-list') assert.ok(!css.includes('.matthew-source-list'))
+      if (componentStyle.marker !== '.matthew-code-block') assert.ok(!css.includes('.matthew-code-block'))
       assert.doesNotMatch(css, /:root\s*\{/)
       assert.doesNotMatch(css, /--matthew-ui-[a-z0-9-]+\s*:/)
       assert.doesNotMatch(css, /@import/)
@@ -243,6 +246,7 @@ export async function checkStyles({
       '.matthew-select',
       '.matthew-dialog',
       '.matthew-source-list',
+      '.matthew-code-block',
     ]) {
       assert.ok(css.includes(selector), `dist/styles.css is missing ${selector}`)
     }

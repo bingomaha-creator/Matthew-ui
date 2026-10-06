@@ -6,6 +6,7 @@ import { JSDOM } from 'jsdom'
 const expectedExports = [
   'AutoComplete',
   'Button',
+  'CodeBlock',
   'Dialog',
   'LinkButton',
   'Menu',
@@ -30,6 +31,7 @@ const taskListModule = await import('matthew-ui/task-list')
 const selectModule = await import('matthew-ui/select')
 const dialogModule = await import('matthew-ui/dialog')
 const sourceListModule = await import('matthew-ui/source-list')
+const codeBlockModule = await import('matthew-ui/code-block')
 const themeModule = await import('matthew-ui/theme')
 
 // 在 React 18/19 各自的真实安装环境验证新配置；不依赖浏览器 effect 才输出变量。
@@ -109,6 +111,10 @@ assert.deepEqual(Object.keys(taskListModule).sort(), ['TaskList'])
 assert.deepEqual(Object.keys(selectModule), ['Select'])
 assert.deepEqual(Object.keys(dialogModule), ['Dialog'])
 assert.deepEqual(Object.keys(sourceListModule), ['SourceList'])
+assert.deepEqual(Object.keys(codeBlockModule), ['CodeBlock'])
+const codeBlockHtml = renderToStaticMarkup(createElement(codeBlockModule.CodeBlock, { code: '<script>raw</script>', title: 'Source' }))
+assert.match(codeBlockHtml, /&lt;script&gt;/)
+assert.doesNotMatch(codeBlockHtml, /<script>/)
 const sourceListHtml = renderToStaticMarkup(createElement(sourceListModule.SourceList, {
   title: 'Sources', items: [{ id: 'one', title: 'Document', href: 'javascript:alert(1)' }],
 }))
@@ -140,6 +146,7 @@ for (const cssEntry of [
   'matthew-ui/select/style.css',
   'matthew-ui/dialog/style.css',
   'matthew-ui/source-list/style.css',
+  'matthew-ui/code-block/style.css',
   'matthew-ui/styles.css',
 ]) {
   assert.match(import.meta.resolve(cssEntry), /\.css$/)

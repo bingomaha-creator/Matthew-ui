@@ -49,6 +49,9 @@ export type { DialogProps } from './components/Dialog'
 export { SourceList } from './components/SourceList'
 export type { SourceListItem, SourceListProps } from './components/SourceList'
 
+export { CodeBlock } from './components/CodeBlock'
+export type { CodeBlockProps, CodeBlockCopyConfig } from './components/CodeBlock'
+
 export {
   createTokens,
   darkTheme,

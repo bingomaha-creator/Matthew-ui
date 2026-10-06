@@ -7,7 +7,7 @@
 
 Matthew UI 是一个使用 React 和 TypeScript 构建并发布到 npm 的 Web 端 UI 组件库，目前提供 Button、Menu、AutoComplete，以及 agent 原生的 Thinking、ToolCall 和 TaskList 组件。项目处于 `0.x` 迭代阶段，公开 API 仍可能调整。
 
-当前源码新增 Select、Dialog 和 SourceList；这三个组件尚未发布，npm 的 `0.3.0` 不包含它们。下面的相关
+当前源码新增 Select、Dialog、SourceList 和 CodeBlock；这四个组件尚未发布，npm 的 `0.3.0` 不包含它们。下面的相关
 示例用于本地构建或后续发布版本，不应直接用于已安装的 `0.3.0`。
 
 - [npm 包：`matthew-ui`](https://www.npmjs.com/package/matthew-ui)
@@ -621,6 +621,27 @@ undefined 不输出，null 字段报错。父子 Provider 按字段继承，撤�
 </ThemeProvider>
 ```
 
+### CodeBlock 组件定制（当前源码，尚未发布）
+
+`theme.components.CodeBlock` 提供 8 个稀疏覆盖字段，不改变 23 个全局 Token：
+
+| 字段 | 类型 | CSS 变量后缀（前缀 `--matthew-ui-code-block-`） |
+| --- | --- | --- |
+| background | string | background |
+| color | string | color |
+| borderColor | string | border-color |
+| headerBackground | string | header-background |
+| headerColor | string | header-color |
+| borderRadius | number ≥ 0 | radius |
+| paddingBlock | number ≥ 0 | padding-block |
+| paddingInline | number ≥ 0 | padding-inline |
+
+颜色仅校验字符串类型，不派生其他色；尺寸为有限非负设计 px，按 16 基准转 rem。
+未配置字段读取当前全局 Token，空对象／undefined 继承父字段；撤销子层覆盖恢复父值
+或默认回退。`color` 控制正文，`headerColor` 只控制标题；语言、复制按钮和反馈默认
+使用全局 `colorText` 保证标题栏上的小字对比度。padding 只控制正文，不改变标题栏。
+公开变量也可在业务祖先或根节点覆盖；不开放宽度、限高或字体 Token。
+
 ## 组件
 
 ### Button 与 LinkButton
@@ -917,6 +938,47 @@ import 'matthew-ui/tokens.css'
 import 'matthew-ui/source-list/style.css'
 ```
 
+### CodeBlock（当前源码，尚未发布）
+
+```tsx
+import { CodeBlock } from 'matthew-ui'
+
+export function ToolArguments() {
+  return <CodeBlock title="调用参数" language="JSON"
+    code={JSON.stringify({ query: '项目架构' }, null, 2)}
+    copy={{ label: '复制', copiedLabel: '已复制', errorLabel: '复制失败' }} />
+}
+```
+
+`code` 必填且只接受原始字符串；`title`／`language` 为可选纯文本，language 仅作标签，
+不触发高亮。默认保留行结构、代码区内部横向滚动，`wrap` 可启用自动换行。
+三项标题栏信息（title、language、copy）都不提供时不显示标题栏。空 code 是合法值。
+
+copy 不提供时没有按钮；提供时三个本地化文案都必填。点击只复制当时的 code，
+不包含标题或反馈，不做 trim／格式化；原生 Clipboard API 成功后才报告成功，
+不支持、权限拒绝或异常报告失败，可手动选中文本复制。反馈约 2 秒后消失，
+pending 阻止重复写入且保留焦点。文本／文案变化、移除 copy 或卸载隔离旧异步完成；
+等值的新 copy 对象不会重置反馈。复制依赖消费环境的安全上下文与权限，不保证总成功。
+
+ref 指向根 div；className/style/data/aria 与适用事件透传。title 是显示标题而非原生
+title 提示。HTML 字符串安全显示为文本，不接受 children/dangerouslySetInnerHTML。
+默认不设最大高度，不内置折叠；可放进 ToolCall 详情。代码区支持键盘聚焦／滚动，
+建议提供有意义的 title 或 aria-label。业务负责序列化、脱敏、截断与限高；例如：
+
+```css
+.material-code .matthew-code-block__pre { max-height: 24rem; }
+```
+
+按需使用：
+
+```tsx
+import { CodeBlock } from 'matthew-ui/code-block'
+import 'matthew-ui/tokens.css'
+import 'matthew-ui/code-block/style.css'
+```
+
+本批不替换业务 SafeMarkdown 的 HTML 渲染管线、不做语法高亮、行号或 Diff 编辑。
+
 ## 公开入口
 
 | 入口 | 内容 |
@@ -931,6 +993,7 @@ import 'matthew-ui/source-list/style.css'
 | `matthew-ui/select` | Select/SelectOption/SelectProps（当前源码，尚未发布） |
 | `matthew-ui/dialog` | Dialog/DialogProps（当前源码，尚未发布） |
 | `matthew-ui/source-list` | SourceList/SourceListItem/SourceListProps（当前源码，尚未发布） |
+| `matthew-ui/code-block` | CodeBlock/CodeBlockProps/CodeBlockCopyConfig（当前源码，尚未发布） |
 | `matthew-ui/theme` | ThemeProvider、主题预设、Token API 及对应类型 |
 | `matthew-ui/tokens.css` | 默认亮色 `:root` Token |
 | `matthew-ui/button/style.css` | Button/LinkButton 样式 |
@@ -942,15 +1005,16 @@ import 'matthew-ui/source-list/style.css'
 | `matthew-ui/select/style.css` | Select 样式（当前源码，尚未发布） |
 | `matthew-ui/dialog/style.css` | Dialog 样式（当前源码，尚未发布） |
 | `matthew-ui/source-list/style.css` | SourceList 样式（当前源码，尚未发布） |
+| `matthew-ui/code-block/style.css` | CodeBlock 样式（当前源码，尚未发布） |
 | `matthew-ui/styles.css` | Token 与全部组件样式 |
 
 组件内部文件不属于公开入口，请不要通过 `matthew-ui/dist/*` 或源码路径导入。
 
 ## 质量验证
 
-- 406 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
-- 88 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
-- 94 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
+- 426 个单元与浏览器测试用例，覆盖 Token、主题作用域、组件配置与实际样式、DOM 语义、受控状态、键盘与指针交互、IME 输入及异步竞态。
+- 100 个 Story 场景，用于验证公开示例、亮暗主题、组件定制、交互行为和可访问性规则。
+- 104 个发布验证器回归用例，覆盖多层依赖、完整发布树孤儿文件、dry-run 打包/安装和默认/定制浏览器样式异常。
 - 真实 `npm pack` tarball 会分别安装到 React 18.2 与 React 19 临时消费端，验证 ESM、CommonJS、类型、CSS、DOM ref、公开入口边界和 Vite Tree Shaking。
 - Chromium 验证无 Provider 的默认 Token 回退，以及按需/全量 CSS 的 Button/LinkButton 定制尺寸、颜色、真实 hover/active 与作用域隔离。
 - Menu还经过真实挂载，验证两种CSS模式的默认/定制尺寸、选中悬停、父标题和浮层；不以SSR静态标记代替子菜单注册与展开。
@@ -961,6 +1025,7 @@ import 'matthew-ui/source-list/style.css'
 - Select 从真实安装包验证两种 CSS 模式、16 字段定制、来源域 Portal 主题桥接、动态撤销、滚动与尺寸跟随、边界翻转、窄视口、变换宿主与原生 Dialog 的两次 Escape。
 - Dialog 从真实安装包验证原生模态、受控关闭、焦点与滚动恢复、保留草稿、12字段主题与遮罩、375px窄视口、200%字体、reduced-motion及 Select 两次 Escape。
 - SourceList 从真实安装包验证两种 CSS 模式、折叠挂载与 Tab 排除、链接安全、焦点回退、12字段定制与动态撤销、320px容器／375px视口、200%字体和真实 reduced-motion。
+- CodeBlock 从真实安装包验证两种 CSS 模式、原文剪贴板写入／失败重试、8字段定制与撤销、亮暗、320px容器／375px视口、200%字体、滚动／换行、焦点与真实 reduced-motion。
 
 ## 本地开发
 

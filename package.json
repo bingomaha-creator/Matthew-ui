@@ -90,6 +90,12 @@
       "require": "./dist/source-list/index.cjs"
     },
     "./source-list/style.css": "./dist/source-list/style.css",
+    "./code-block": {
+      "types": "./dist/code-block/index.d.ts",
+      "import": "./dist/code-block/index.js",
+      "require": "./dist/code-block/index.cjs"
+    },
+    "./code-block/style.css": "./dist/code-block/style.css",
     "./theme": {
       "types": "./dist/theme/index.d.ts",
       "import": "./dist/theme/index.js",
